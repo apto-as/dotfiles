@@ -4,7 +4,7 @@ set -u
 
 echo ".....install start!"
 
-sh initialize.sh
+sh ~/dotfiles/initialize.sh
 
 chsh -s /bin/zsh
 
