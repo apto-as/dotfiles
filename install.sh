@@ -20,6 +20,7 @@ sh ~/.vim_runtime/install_awesome_vimrc.sh
 ln -snfv ~/dotfiles/my_configs.vim ~/.vim_runtime/
 
 #dotfiles install
+cd ~/dotfiles
 for f in .??*; do
     [ "$f" = ".git" ] && continue
     [ "$f" = ".gitconfig.local.template" ] && continue
@@ -28,6 +29,7 @@ for f in .??*; do
 
     ln -snfv ~/dotfiles/"$f" ~/
 done
+cd ~/
 
 #vim plug install
 vim +PlugInstall
