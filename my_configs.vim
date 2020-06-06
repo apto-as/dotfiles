@@ -49,6 +49,30 @@ highlight GitGutterChangeDelete ctermfg=4
 "" vim-markdown
 let g:vim_markdown_folding_disabled=1
 
+"" vim-lightline
+let g:lightline = {
+       \ 'colorscheme': 'powerline',
+       \ 'active': {
+       \   'left': [ ['mode', 'paste'],
+       \             ['gitbranch', 'fugitive', 'readonly', 'filename', 'modified'] ],
+       \   'right': [ [ 'lineinfo' ],
+       \              [ 'percent' ],
+       \              [ 'fileformat', 'fileencoding', 'filetype' ] ]
+       \ },
+       \ 'component': {
+       \   'readonly': '%{&filetype=="help"?"":&readonly?"🔒":""}',
+       \   'modified': '%{&filetype=="help"?"":&modified?"+":&modifiable?"":"-"}',
+       \   'fugitive': '%{exists("*FugitiveHead")?FugitiveHead():""}'
+       \ },
+       \ 'component_visible_condition': {
+       \   'readonly': '(&filetype!="help"&& &readonly)',
+       \   'modified': '(&filetype!="help"&&(&modified||!&modifiable))',
+       \   'fugitive': '(exists("*FugitiveHead") && ""!=FugitiveHead())'
+       \ }
+       \ }
+
+set noshowmode
+
 "" line
 set number
 
