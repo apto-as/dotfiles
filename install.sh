@@ -31,5 +31,5 @@ git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 echo ".....install end!"
 echo ".....next command"
 echo "p10k configure"
-
+echo "tmux and Ctrl+q -> I"
 
