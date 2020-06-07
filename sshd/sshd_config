@@ -1,0 +1,27 @@
+Protocol 2
+Port 52102
+
+SyslogFacility AUTH
+LogLevel INFO
+
+PermitRootLogin no
+PubkeyAuthentication yes
+
+IgnoreRhosts yes
+
+PasswordAuthentication no
+PermitEmptyPasswords no
+
+ChallengeResponseAuthentication no
+
+UsePAM yes
+
+X11Forwarding yes
+PrintMotd no
+
+# Allow client to pass locale environment variables
+AcceptEnv LANG LC_*
+
+# override default of no subsystems
+Subsystem	sftp	/usr/lib/openssh/sftp-serve
+r
