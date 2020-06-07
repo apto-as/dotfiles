@@ -28,8 +28,13 @@ vim +PlugInstall
 #tpm install
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
+#sshd install
+sudo ln -snfv ~/dotfiles/sshd/sshd_config /etc/ssh/
+
 echo ".....install end!"
 echo ".....next command"
+echo "sshd -t"
+echo "service sshd restart"
 echo "p10k configure"
 echo "tmux and Ctrl+q -> I"
 
