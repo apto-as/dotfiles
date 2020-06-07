@@ -1,5 +1,5 @@
 Protocol 2
-Port 52102
+Port 49233 
 
 SyslogFacility AUTH
 LogLevel INFO
