@@ -11,7 +11,7 @@ sudo apt-get update \
 sudo apt-get install -y tree curl
 sudo apt-get install -y ufw
 sudo apt-get install -y vim
-suto apt-get install -y tmux
+sudo apt-get install -y tmux
 sudo apt-get install -y imagemagick pdftk
 sudo apt-get install -y peco
 sudo apt-get install -y docker-compose
