@@ -24,6 +24,9 @@ Plug 'pangloss/vim-javascript'
 " markdown
 Plug 'tpope/vim-markdown'
 
+" Doracula theme
+Plug 'dracula/vim', { 'as': 'dracula' }
+
 call plug#end()
 
 "" NERDTree
