@@ -29,6 +29,9 @@ Plug 'dracula/vim', { 'as': 'dracula' }
 
 call plug#end()
 
+"" set doracula theme
+let g:dracula_colorterm = 1
+
 "" NERDTree
 let g:NERDTreeChDirMode=1
 let g:NERDTreeShowBookmarks=1
