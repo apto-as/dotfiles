@@ -11,6 +11,11 @@ fi
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
+# prezto local customize
+if [ -f ~/.preztorc_local.zsh  ]; then
+  source ~/.preztorc_local.zsh
+fi
+
 fpath=(path/to/zsh-completions/src $fpath)
 
 #peco
