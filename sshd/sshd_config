@@ -23,5 +23,6 @@ PrintMotd no
 AcceptEnv LANG LC_*
 
 # override default of no subsystems
-Subsystem	sftp	/usr/lib/openssh/sftp-serve
+#Subsystem	sftp	/usr/lib/openssh/sftp-server
+Subsystem	sftp	internal-sftp
 
