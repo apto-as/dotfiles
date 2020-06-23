@@ -30,7 +30,9 @@ Plug 'dracula/vim', { 'as': 'dracula' }
 call plug#end()
 
 "" set doracula theme
-let g:dracula_colorterm = 1
+let g:dracula_colorterm = 0
+let g:dracula_italic = 0
+colorscheme dracula
 
 "" NERDTree
 let g:NERDTreeChDirMode=1
@@ -57,7 +59,7 @@ let g:vim_markdown_folding_disabled=1
 
 "" vim-lightline
 let g:lightline = {
-       \ 'colorscheme': 'powerline',
+       \ 'colorscheme': 'dracula',
        \ 'active': {
        \   'left': [ ['mode', 'paste'],
        \             ['gitbranch', 'fugitive', 'readonly', 'filename', 'modified'] ],
