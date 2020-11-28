@@ -15,6 +15,7 @@ sudo apt-get install -y tmux
 sudo apt-get install -y imagemagick pdftk
 sudo apt-get install -y peco
 sudo apt-get install -y docker-compose
+sudo apt-get install -y mosh
 sudo gpasswd -a $USER docker
 
 #nvidia-docker install
