@@ -7,7 +7,6 @@ if !1 | finish | endif
 
 set number
 set nocompatible
-syntax enable
 set fileencodings=utf-8,sjis,euc-jp,latin
 set encoding=utf-8
 set title
@@ -20,7 +19,6 @@ set cmdheight=1
 set laststatus=2
 set scrolloff=10
 set expandtab
-"let loaded_matchparen = 1
 set shell=fish
 set backupskip=/tmp/*,/private/tmp/*
 
@@ -35,9 +33,6 @@ set t_BE=
 set nosc noru nosm
 " Don't redraw while executing macros (good performance config)
 set lazyredraw
-"set showmatch
-" How many tenths of a second to blink when matching brackets
-"set mat=2
 " Ignore case when searching
 set ignorecase
 " Be smart when using tabs ;)
@@ -67,10 +62,6 @@ set formatoptions+=r
 
 set suffixesadd=.js,.es,.jsx,.json,.css,.less,.sass,.styl,.php,.py,.md
 
-autocmd FileType coffee setlocal shiftwidth=2 tabstop=2
-autocmd FileType ruby setlocal shiftwidth=2 tabstop=2
-autocmd FileType yaml setlocal shiftwidth=2 tabstop=2
-
 " JavaScript
 au BufNewFile,BufRead *.es6 setf javascript
 " TypeScript
@@ -85,7 +76,6 @@ au BufNewFile,BufRead *.flow set filetype=javascript
 "-------------------------------------------------------------------------------
 
 set cursorline
-"set cursorcolumn
 
 " Set cursor line color on visual mode
 highlight Visual cterm=NONE ctermbg=236 ctermfg=NONE guibg=Grey40
@@ -131,30 +121,6 @@ set completeopt-=preview
 let g:localvimrc_ask = 0
 
 "-------------------------------------------------------------------------------
-" Dein
-"-------------------------------------------------------------------------------
-
-let s:dein_dir = expand('~/.cache/dein')
-set runtimepath+=~/.cache/dein/repos/github.com/Shougo/dein.vim
-if dein#load_state(s:dein_dir)
-  call dein#begin(s:dein_dir)
-
-  let g:rc_dir = expand('~/.vim/rc')
-  let s:toml = g:rc_dir . '/dein.toml'
-  let s:lazy_toml = g:rc_dir . '/dein_lazy.toml'
-  call dein#load_toml(s:toml,      {'lazy': 0})
-  call dein#load_toml(s:lazy_toml, {'lazy': 1})
-
-  call dein#end()
-  call dein#save_state()
-endif
-if dein#check_install()
-  call dein#install()
-endif
-
-filetype plugin indent on
-
-"-------------------------------------------------------------------------------
 " DevIcons
 "-------------------------------------------------------------------------------
 
@@ -165,7 +131,7 @@ let g:webdevicons_enable_vimfiler = 1
 " Color scheme
 "-------------------------------------------------------------------------------
 
-colorscheme dracula
+#colorscheme dracula
 
 "-------------------------------------------------------------------------------
 " imports
@@ -179,7 +145,6 @@ if has("unix")
   endif
 endif
 
-source ~/.vimrc.maps
-source ~/.vimrc.lightline
+source ~/.vim/rc/maps.rc.vim
 
 set exrc
