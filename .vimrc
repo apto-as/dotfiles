@@ -72,28 +72,6 @@ au BufNewFile,BufRead *.md set filetype=markdown
 au BufNewFile,BufRead *.flow set filetype=javascript
 
 "-------------------------------------------------------------------------------
-" Cursor line
-"-------------------------------------------------------------------------------
-
-set cursorline
-
-" Set cursor line color on visual mode
-highlight Visual cterm=NONE ctermbg=236 ctermfg=NONE guibg=Grey40
-
-highlight LineNr       cterm=none ctermfg=240 guifg=#2b506e guibg=#000000
-
-augroup BgHighlight
-  autocmd!
-  autocmd WinEnter * set cul
-  autocmd WinLeave * set nocul
-augroup END
-
-if &term =~ "screen"
-  autocmd BufEnter * if bufname("") !~ "^?[A-Za-z0-9?]*://" | silent! exe '!echo -n "\ek[`hostname`:`basename $PWD`/`basename %`]\e\\"' | endif
-  autocmd VimLeave * silent!  exe '!echo -n "\ek[`hostname`:`basename $PWD`]\e\\"'
-endif
-
-"-------------------------------------------------------------------------------
 " Other plugins
 "-------------------------------------------------------------------------------
 
@@ -104,7 +82,7 @@ let g:go_disable_autoinstall = 1
 let g:vim_json_syntax_conceal = 0
 
 " Status line
-if !exists('*fugitive#statusline')
+if exists('*fugitive#statusline')
   set statusline=%F\ %m%r%h%w%y%{'['.(&fenc!=''?&fenc:&enc).':'.&ff.']'}[L%l/%L,C%03v]
   set statusline+=%=
   set statusline+=%{fugitive#statusline()}
@@ -131,7 +109,7 @@ let g:webdevicons_enable_vimfiler = 1
 " Color scheme
 "-------------------------------------------------------------------------------
 
-#colorscheme dracula
+colorscheme dracula
 
 "-------------------------------------------------------------------------------
 " imports

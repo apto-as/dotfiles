@@ -3,10 +3,6 @@ repo = 'Shougo/dein.vim'
 
 [[plugins]]
 repo = 'dracula/vim'
-name = 'dracula'
-hook_add = '''
-colorscheme dracula
-'''
 
 [[plugins]]
 repo = 'tpope/vim-fugitive'
@@ -47,7 +43,7 @@ hook_post_update = '''
 [[plugins]]
 repo = 'Shougo/defx.nvim'
 depends = ['defx-git', 'defx-icons']
-hook_add = """
+hook_post_source = """
 source ~/.config/nvim/plugins/defx.rc.vim
 """
 
@@ -59,7 +55,7 @@ repo = 'kristijanhusak/defx-git'
 
 [[plugins]]
 repo = 'Shougo/denite.nvim'
-hook_add = """
+hook_post_source = """
 source ~/.config/nvim/plugins/denite.rc.vim
 """
 
