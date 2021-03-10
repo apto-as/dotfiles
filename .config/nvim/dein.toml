@@ -3,6 +3,10 @@ repo = 'Shougo/dein.vim'
 
 [[plugins]]
 repo = 'dracula/vim'
+name = 'dracula'
+hook_add = '''
+  au VimEnter * nested colorscheme dracula
+'''
 
 [[plugins]]
 repo = 'tpope/vim-fugitive'
