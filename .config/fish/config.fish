@@ -1,5 +1,8 @@
 set -x EDITOR nvim
 
+# start node js
+nvm use lts
+
 # alias
 alias vim='nvim'
 alias g='git'
