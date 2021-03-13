@@ -41,7 +41,7 @@
 [hub]
   protocol = https
 [github]
-	user = craftzdog
+	user = apto-as
 [diff]
   tool = nvimdiff
 [difftool "nvimdiff"]

@@ -11,7 +11,7 @@ cp .vimrc ~/
 cp .vimrc.osx ~/
 cp -R .config/ ~/
 cp -R .vim/ ~/
-cp sshd/config ~/.ssh/
+cp ethminer/bin/* ~/ethminer/bin/ 
 sudo cp sshd/sshd_config /etc/ssh/
 
 cd ~
