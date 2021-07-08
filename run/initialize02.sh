@@ -6,10 +6,6 @@ chmod 755 Miniconda3-latest-Linux-x86_64.sh
 # init miniconda to fish shell
  ./miniconda3/bin/conda init fish
 
-# install dein.vim
-curl https://raw.githubusercontent.com/Shougo/dein.vim/master/bin/installer.sh > installer.sh
-sh ./installer.sh ~/.cache/dein
-
 # install fisher and plugins
 curl https://git.io/fisher --create-dirs -sLo ~/.config/fish/functions/fisher.fish
 

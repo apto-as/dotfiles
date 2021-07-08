@@ -3,7 +3,16 @@
 set -u
 
 # install base commands
-sudo apt install -y curl ufw peco mosh golang fish neovim tmux mosh
+sudo apt install -y wget curl ufw peco mosh golang fish neovim nodejs tmux ffmpeg bat 
+
+# install neovim develop version
+sudo add-apt-repository ppa:neovim-ppa/unstable
+sudo apt-get update
+sudo apt install neovim/focal
+
+# install vim-plugin
+sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
+       https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
 
 #nvidia-docker install
 // install docker
@@ -25,6 +34,15 @@ go get github.com/x-motemen/ghq
 
 # install tpm
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+
+# install exa
+wget https://github.com/ogham/exa/releases/download/v0.10.0/exa-linux-x86_64-v0.10.0.zip
+unzip -d temp/ exa-linux-x86_64-v0.10.0.zip
+sudo mv temp/bin/exa /usr/local/bin/
+sudo mv temp/man/exa.1 /usr/share/man/man1/
+sudo mv temp/man/exa_colors.5 /usr/share/man/man5/
+sudo mv temp/completions/exa.fish /usr/share/fish/vendor_completions.d/
+rm -rf temp/
 
 # change shell to fish
 echo $(which fish) | sudo tee -a /etc/shells

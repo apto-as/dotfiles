@@ -1,77 +1,89 @@
-set -x EDITOR nvim
+set -gx EDITOR nvim
 
-# start node js
-nvm use lts
+set -gx PATH bin $PATH
+set -gx PATH ~/bin $PATH
+set -gx PATH ~/.local/bin $PATH
 
-# alias
-alias vim='nvim'
-alias g='git'
- 
- 
-# ----------
-# bobthefish config
-# ----------
-set -g theme_display_git no
-set -g theme_display_git_dirty no
-set -g theme_display_git_untracked no
-set -g theme_display_git_ahead_verbose yes
-set -g theme_display_git_dirty_verbose yes
-set -g theme_display_git_stashed_verbose yes
-set -g theme_display_git_default_branch yes
-set -g theme_git_default_branches master main
-set -g theme_git_worktree_support yes
-set -g theme_use_abbreviated_branch_name yes
-set -g theme_display_vagrant yes
-set -g theme_display_docker_machine no
-set -g theme_display_k8s_context yes
-set -g theme_display_hg yes
-set -g theme_display_virtualenv no
-set -g theme_display_nix no
-set -g theme_display_ruby no
-set -g theme_display_node yes
-set -g theme_display_user ssh
-set -g theme_display_hostname ssh
-set -g theme_display_vi no
-set -g theme_display_date no
-set -g theme_display_cmd_duration yes
-set -g theme_title_display_process yes
-set -g theme_title_display_path no
-set -g theme_title_display_user yes
-set -g theme_title_use_abbreviated_path no
-set -g theme_date_format "+%a %H:%M"
-set -g theme_date_timezone America/Los_Angeles
-set -g theme_avoid_ambiguous_glyphs yes
-set -g theme_powerline_fonts no
-set -g theme_nerd_fonts yes
-set -g theme_show_exit_status yes
-set -g theme_display_jobs_verbose yes
-set -g default_user your_normal_user
-set -g theme_color_scheme dracula 
-set -g fish_prompt_pwd_dir_length 0
-set -g theme_project_dir_length 1
-set -g theme_newline_cursor yes
-set -g theme_newline_prompt '$ '
+# Go
+set -g GOPATH $HOME/go
+set -gx PATH $GOPATH/bin $PATH
 
-# ----------
-# peco config
-# ----------
-function peco_select_history_order
-  if test (count $argv) = 0
-    set peco_flags --layout=top-down
+# NVM
+function __check_rvm --on-variable PWD --description 'Do nvm stuff'
+  status --is-command-substitution; and return
+
+  if test -f .nvmrc; and test -r .nvmrc;
+    nvm use lts
   else
-    set peco_flags --layout=bottom-up --query "$argv"
-  end
-
-  history|peco $peco_flags|read foo
-
-  if [ $foo ]
-    commandline $foo
-  else
-    commandline ''
   end
 end
 
-function fish_user_key_bindings
-  bind \cr 'peco_select_history_order' # control + R
-  bind \cx\ck peco_kill # control + X ~ control + K
+# alias
+alias vim nvim
+alias g git
+alias ls "exa -ahl"
+alias la "exa -ahl --git"
+command -qv nvim && alias vim nvim
+
+#-----------
+# exa config and function
+#-----------
+function cd
+  if test (count $argv) -eq 0
+    cd $HOME
+    return 0
+  else if test (count $argv) -gt 1
+    printf "%s\n" (_ "Too many args for cd command")
+    return 1
+  end
+  # Avoid set completions.
+  set -l previous $PWD
+
+  if test "$argv" = "-"
+    if test "$__fish_cd_direction" = "next"
+      nextd
+    else
+      prevd
+    end
+    return $status
+  end
+  builtin cd $argv
+  set -l cd_status $status
+  # Log history
+  if test $cd_status -eq 0 -a "$PWD" != "$previous"
+    set -q dirprev[$MAX_DIR_HIST] and set -e dirprev[1]
+    set -g dirprev $dirprev $previous
+    set -e dirnext
+    set -g __fish_cd_direction prev
+  end
+
+  if test $cd_status -ne 0
+    return 1
+  end
+  pwd
+  exa -ahl --git
+  return $status
+end
+
+# ----------
+# bobthefish config
+# ----------
+set -g theme_powerline_fonts no
+set -g theme_nerd_fonts yes
+set -g theme_color_scheme dracula 
+set -g theme_newline_cursor yes
+set -g theme_newline_prompt '$ '
+
+switch (uname)
+  case Darwin
+    source (dirname (status --current-filename))/config-osx.fish
+  case Linux
+    # Do nothing
+  case '*'
+    source (dirname (status --current-filename))/config-windows.fish
+end
+
+set LOCAL_CONFIG (dirname (status --current-filename))/config-local.fish
+if test -f $LOCAL_CONFIG
+  source $LOCAL_CONFIG
 end
