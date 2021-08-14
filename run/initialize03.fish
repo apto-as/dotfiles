@@ -21,6 +21,10 @@ npm install -g typescript typescript-language-server
 npm install -g pyright
 npm install -g diagnostic-languageserver
 
+# install aws ctl
+sudo apt install -y awscli
+npm install -g awsp
+
 # install nvim plugins
 nvim
 
