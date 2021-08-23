@@ -49,7 +49,7 @@ echo $(which fish) | sudo tee -a /etc/shells
 chsh -s $(which fish)
 
 #dotfiles install
-sh ~/dotfiles/deploy.sh
+sh ~/dotfiles/run/deploy.sh
 
 # system reboot
 sudo reboot
