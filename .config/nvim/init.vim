@@ -141,6 +141,9 @@ let g:dracula_colorterm = 1
 
 "}}}
 
+" mouse settings
+set mouse=a
+
 " Extras "{{{
 " ---------------------------------------------------------------------
 set exrc
