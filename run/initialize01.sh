@@ -14,8 +14,8 @@ sudo apt install neovim/focal
 sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
 
-#nvidia-docker install
-// install docker
+# nvidia-docker install
+# install docker
 curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
 sudo usermod -aG docker $USER
@@ -38,14 +38,14 @@ go get github.com/x-motemen/ghq
 # install tpm
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
-# install exa
-wget https://github.com/ogham/exa/releases/download/v0.10.0/exa-linux-x86_64-v0.10.0.zip
-unzip -d temp/ exa-linux-x86_64-v0.10.0.zip
-sudo mv temp/bin/exa /usr/local/bin/
-sudo mv temp/man/exa.1 /usr/share/man/man1/
-sudo mv temp/man/exa_colors.5 /usr/share/man/man5/
-sudo mv temp/completions/exa.fish /usr/share/fish/vendor_completions.d/
-rm -rf temp/
+# install alacritty exa
+if [ "$(uname)" == 'Darwin' ]; then
+  brew install exa
+  brew install --cask alacritty
+elif
+  cargo install exa
+  cargo install alacritty
+fi
 
 # change shell to fish
 echo $(which fish) | sudo tee -a /etc/shells
