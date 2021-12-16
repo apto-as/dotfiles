@@ -3,12 +3,7 @@
 set -u
 
 # install base commands
-sudo apt install -y wget curl ufw peco mosh golang fish neovim nodejs tmux ffmpeg bat 
-
-# install neovim develop version
-sudo add-apt-repository ppa:neovim-ppa/unstable
-sudo apt-get update
-sudo apt install neovim/focal
+sudo apt install -y wget curl ufw peco mosh golang fish neovim nodejs tmux ffmpeg bat lf
 
 # install vim-plugin
 sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \

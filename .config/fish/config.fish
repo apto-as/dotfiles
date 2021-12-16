@@ -22,7 +22,7 @@ end
 alias vim nvim
 alias g git
 alias ls "exa -ahl"
-alias la "exa -ahl --git"
+alias la "exa -ahl --git --icons"
 command -qv nvim && alias vim nvim
 
 #-----------
@@ -61,7 +61,7 @@ function cd
     return 1
   end
   pwd
-  exa -ahl --git
+  exa -ahl --git --icons
   return $status
 end
 

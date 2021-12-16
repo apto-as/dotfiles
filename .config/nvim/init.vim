@@ -107,8 +107,6 @@ autocmd FileType yaml setlocal shiftwidth=2 tabstop=2
 
 "}}}
 
-let g:python3_host_prog = '~/miniconda3/bin/python'
-
 " Imports "{{{
 " ---------------------------------------------------------------------
 runtime ./plug.vim
@@ -117,6 +115,8 @@ if has("unix")
   " Do Mac stuff
   if s:uname == "Darwin\n"
     runtime ./macos.vim
+  else
+    let g:python3_host_prog = '~/miniconda3/bin/python'
   endif
 endif
 

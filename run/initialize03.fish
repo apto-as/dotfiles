@@ -31,5 +31,5 @@ npm install -g awsp
 # install nvim plugins
 nvim
 
-# install tmux plugins (Ctrl-T, Ctrl-I)
+# install tmux plugins (Ctrl-B, Ctrl-I)
 tmux
