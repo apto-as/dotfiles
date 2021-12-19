@@ -1,12 +1,14 @@
 #!/usr/bin/env fish
 
 # fisher plugins install
-fisher install oh-my-fish/theme-bobthefish
 fisher install oh-my-fish/plugin-peco
 fisher install jethrokuan/z
 fisher install decors/fish-ghq
 fisher install jorgebucaran/fish-nvm
 fisher install edc/bass
+fisher install jethrokuan/fzf
+fisher install dracula/fish  
+fisher install IlanCosman/tide@v5
 
 # intall node latest
 nvm install 'lts/*'

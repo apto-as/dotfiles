@@ -2,30 +2,33 @@ if has("nvim")
   let g:plug_home = stdpath('data') . '/plugged'
 endif
 
-call plug#begin()
+call plug#begin()Q
 
-Plug 'tpope/vim-fugitive'
-Plug 'tpope/vim-rhubarb'
+" github control
+Plug 'lambdalisue/gina.vim'
+
+" auto close parentheses and repea
 Plug 'cohama/lexima.vim'
 
-if has("nvim")
-  Plug 'hoob3rt/lualine.nvim'
-  Plug 'kristijanhusak/defx-git'
-  Plug 'kristijanhusak/defx-icons'
-  Plug 'Shougo/defx.nvim', { 'do': ':UpdateRemotePlugins' }
-  Plug 'neovim/nvim-lspconfig'
-  Plug 'tami5/lspsaga.nvim'
-  Plug 'folke/lsp-colors.nvim'
-  Plug 'nvim-lua/completion-nvim'
-  Plug 'nvim-treesitter/nvim-treesitter', { 'do': ':TSUpdate' }
-  Plug 'kyazdani42/nvim-web-devicons'
-  Plug 'nvim-lua/popup.nvim'
-  Plug 'nvim-lua/plenary.nvim'
-  Plug 'nvim-telescope/telescope.nvim'
-endif
+" powerful sintax color
+Plug 'nvim-treesitter/nvim-treesitter', { 'do': ':TSUpdate' }
 
-Plug 'groenewege/vim-less', { 'for': 'less' }
-Plug 'kchmck/vim-coffee-script', { 'for': 'coffee' }
+" searching
+Plug 'junegunn/fzf', {'dir': '~/.fzf_bin', 'do': './install --all'}
+
+" LSP and vscode like extentions
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+
+" directory ui
+Plug 'lambdalisue/fern.vim'
+
+" add vim develop font icons
+Plug 'kyazdani42/nvim-web-devicons'
+
+" theme and window control and powerline
+Plug 'hoob3rt/lualine.nvim'
 Plug 'dracula/vim', { 'as': 'dracula' } 
+Plug 'simeji/winresizer'
+Plug 'vim-jp/vimdoc-ja'
 
 call plug#end()

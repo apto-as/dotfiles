@@ -6,8 +6,8 @@ set -u
 eval “$(/opt/homebrew/bin/brew shellenv)”
 
 xcode-select --install
-brew install wget peco mosh golang rust tree-sitter luajit fish neovim nodejs tmux lf ffmpeg bat exa gcc
-brew install --cask alacritty
+arch -arm64 brew install wget peco mosh golang rust tree-sitter luajit fish neovim nodejs tmux lf ffmpeg bat ripgrep fzf exa gcc
+arch -arm64 brew install --cask alacritty
 
 # install vim-plugin
 sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \

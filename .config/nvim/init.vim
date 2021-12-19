@@ -23,7 +23,6 @@ set cmdheight=1
 set laststatus=2
 set scrolloff=10
 set expandtab
-"let loaded_matchparen = 1
 set shell=fish
 set backupskip=/tmp/*,/private/tmp/*
 
@@ -63,28 +62,8 @@ autocmd InsertLeave * set nopaste
 " Add asterisks in block comments
 set formatoptions+=r
 
-"}}}
-
-" Highlights "{{{
-" ---------------------------------------------------------------------
-set cursorline
-"set cursorcolumn
-
-" Set cursor line color on visual mode
-highlight Visual cterm=NONE ctermbg=236 ctermfg=NONE guibg=Grey40
-
-highlight LineNr cterm=none ctermfg=240 guifg=#2b506e guibg=#000000
-
-augroup BgHighlight
-  autocmd!
-  autocmd WinEnter * set cul
-  autocmd WinLeave * set nocul
-augroup END
-
-if &term =~ "screen"
-  autocmd BufEnter * if bufname("") !~ "^?[A-Za-z0-9?]*://" | silent! exe '!echo -n "\ek[`hostname`:`basename $PWD`/`basename %`]\e\\"' | endif
-  autocmd VimLeave * silent!  exe '!echo -n "\ek[`hostname`:`basename $PWD`]\e\\"'
-endif
+" mouse settings
+set mouse=a
 
 "}}}
 
@@ -92,18 +71,10 @@ endif
 " ---------------------------------------------------------------------
 " JavaScript
 au BufNewFile,BufRead *.es6 setf javascript
-" TypeScript
-au BufNewFile,BufRead *.tsx setf typescriptreact
-" Markdown
-au BufNewFile,BufRead *.md set filetype=markdown
 " Flow
 au BufNewFile,BufRead *.flow set filetype=javascript
 
 set suffixesadd=.js,.es,.jsx,.json,.css,.less,.sass,.styl,.php,.py,.md
-
-autocmd FileType coffee setlocal shiftwidth=2 tabstop=2
-autocmd FileType ruby setlocal shiftwidth=2 tabstop=2
-autocmd FileType yaml setlocal shiftwidth=2 tabstop=2
 
 "}}}
 
@@ -140,9 +111,6 @@ colorscheme dracula
 let g:dracula_colorterm = 1
 
 "}}}
-
-" mouse settings
-set mouse=a
 
 " Extras "{{{
 " ---------------------------------------------------------------------
