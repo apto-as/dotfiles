@@ -18,7 +18,6 @@ let g:coc_global_extensions = [\
   \'coc-phpls',
   \'coc-sql',
   \'coc-julia',
-  \'coc-nginx',
   \'coc-docker',
   \'coc-pydocstring',
   \'coc-rust-analyzer',
