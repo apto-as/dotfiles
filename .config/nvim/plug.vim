@@ -2,7 +2,7 @@ if has("nvim")
   let g:plug_home = stdpath('data') . '/plugged'
 endif
 
-call plug#begin()Q
+call plug#begin()
 
 " github control
 Plug 'lambdalisue/gina.vim'
