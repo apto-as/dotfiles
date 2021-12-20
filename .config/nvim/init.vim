@@ -1,4 +1,4 @@
-" Fundamentals "{{{
+"  Fundamentals "{{{
 " ---------------------------------------------------------------------
 
 " init autocmd
@@ -109,6 +109,8 @@ endif
 
 colorscheme dracula
 let g:dracula_colorterm = 1
+let g:dracula_inverse = 1
+
 
 "}}}
 
