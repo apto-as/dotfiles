@@ -21,6 +21,8 @@ Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 " directory ui
 Plug 'lambdalisue/fern.vim'
+Plug 'yuki-yano/fern-preview.vim'
+Plug 'lambdalisue/fern-git-status.vim'
 
 " add vim develop font icons
 Plug 'kyazdani42/nvim-web-devicons'
