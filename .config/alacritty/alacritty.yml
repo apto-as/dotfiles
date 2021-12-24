@@ -27,7 +27,7 @@ font:
 
 window:
   decorations: full
-  dynamic_padding: true    
+  dynamic_padding: true
   background_opacity: 0.93
   padding:
     x: 8
