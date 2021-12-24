@@ -5,9 +5,10 @@ lualine.setup {
   options = {
     icons_enabled = true,
     theme = 'dracula',
-    section_separators = {'', ''},
-    component_separators = {'', ''},
-    disabled_filetypes = {}
+    component_separators = { left = '', right = ''},
+    section_separators = { left = '', right = ''},
+    disabled_filetypes = {},
+    always_divide_middle = true,  
   },
   sections = {
     lualine_a = {'mode'},
@@ -29,6 +30,7 @@ lualine.setup {
     lualine_y = {},
     lualine_z = {}
   },
-  tabline = {}
+  tabline = {},
+  extensions = {}
 }
 
