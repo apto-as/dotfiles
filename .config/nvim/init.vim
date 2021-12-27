@@ -111,6 +111,11 @@ colorscheme dracula
 let g:dracula_colorterm = 1
 let g:dracula_inverse = 1
 
+highlight Normal ctermbg=NONE guibg=NONE
+highlight NonText ctermbg=NONE guibg=NONE
+highlight LineNr ctermbg=NONE guibg=NONE
+highlight Folded ctermbg=NONE guibg=NONE
+highlight EndOfBuffer ctermbg=NONE guibg=NONE
 
 "}}}
 
