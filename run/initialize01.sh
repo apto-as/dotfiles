@@ -33,14 +33,9 @@ go get github.com/x-motemen/ghq
 # install tpm
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
-# install alacritty exa
-if [ "$(uname)" == 'Darwin' ]; then
-  brew install exa
-  brew install --cask alacritty
-elif
-  cargo install exa
-  cargo install alacritty
-fi
+# install kitty exa
+cargo install exa
+curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
 
 # change shell to fish
 echo $(which fish) | sudo tee -a /etc/shells
