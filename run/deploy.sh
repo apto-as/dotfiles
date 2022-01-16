@@ -7,7 +7,7 @@ cp .gitignore ~/
 cp .tmux.conf ~/
 cp .tmux.conf.osx ~/
 cp .tmux.conf.powerline ~/
-cp -r .config/ ~/.config/
+cp -RT .config/ ~/.config/
 cp ethminer/bin/* ~/ethminer/bin/ 
 sudo cp sshd/sshd_config /etc/ssh/
 
