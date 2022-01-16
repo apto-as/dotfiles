@@ -9,7 +9,7 @@ set -gx PATH ~/.local/bin $PATH
 set -g GOPATH $HOME/go
 set -gx PATH $GOPATH/bin $PATH
 
-# NVM
+# NVM for MacOS
 function __check_rvm --on-variable PWD --description 'Do nvm stuff'
   status --is-command-substitution; and return
 
@@ -18,6 +18,9 @@ function __check_rvm --on-variable PWD --description 'Do nvm stuff'
   else
   end
 end
+
+# NVM for Linux
+# set --universal nvm_default_version v16
 
 # alias
 alias vim nvim
