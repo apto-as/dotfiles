@@ -18,11 +18,6 @@ nvm use lts
 pip install neovim
 npm install -g neovim
 
-# install lsp
-npm install -g typescript typescript-language-server
-npm install -g pyright
-npm install -g diagnostic-languageserver
-
 # install pysen
 pip install pysen
 
