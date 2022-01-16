@@ -87,7 +87,7 @@ if has("unix")
   if s:uname == "Darwin\n"
     runtime ./macos.vim
   else
-    let g:python3_host_prog = '~/miniconda3/bin/python'
+    let g:python3_host_prog = '~/miniforge3/bin/python'
   endif
 endif
 
