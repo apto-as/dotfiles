@@ -3,7 +3,13 @@
 set -u
 
 # install base commands
-sudo apt install -y wget curl ufw peco mosh golang fish neovim nodejs tmux cargo ffmpeg fzf ripgrep gcc
+sudo apt install -y wget curl ufw peco mosh golang nodejs tmux ffmpeg fzf ripgrep gcc
+
+# install nvim fish
+sudo add-apt-repository ppa:neovim-ppa/stable
+sudo add-apt-repository ppa:fish-shell/release-3
+sudo apt update
+sudo apt install -y fish neovim
 
 # install vim-plugin
 sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
@@ -27,7 +33,16 @@ echo $(which fish) | sudo tee -a /etc/shells
 chsh -s $(which fish)
 
 #dotfiles install
-sh ~/dotfiles/run/deploy.sh
+cd ~/dotfiles
+
+cp .gitconfig ~/
+cp .gitignore ~/
+cp .tmux.conf ~/
+cp .tmux.conf.osx ~/
+cp .tmux.conf.powerline ~/
+cp -RT .config/ ~/.config/
+
+cd ~
 
 # system reboot
 sudo reboot

@@ -10,3 +10,9 @@ curl https://git.io/fisher --create-dirs -sLo ~/.config/fish/functions/fisher.fi
 
 # install nvm latest (require finsh-nvm)
 curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+
+cd ~/dotfiles
+sudo cp sshd/sshd_config /etc/ssh/
+cd ~/
+
+done

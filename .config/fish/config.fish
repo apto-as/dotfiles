@@ -9,6 +9,9 @@ set -gx PATH ~/.local/bin $PATH
 set -g GOPATH $HOME/go
 set -gx PATH $GOPATH/bin $PATH
 
+# Rust
+set -gx PATH $HOME/.cargo/bin $PATH
+
 # NVM for MacOS
 nvm use lts
 
