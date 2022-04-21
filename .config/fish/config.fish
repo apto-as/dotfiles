@@ -10,14 +10,7 @@ set -g GOPATH $HOME/go
 set -gx PATH $GOPATH/bin $PATH
 
 # NVM for MacOS
-function __check_rvm --on-variable PWD --description 'Do nvm stuff'
-  status --is-command-substitution; and return
-
-  if test -f .nvmrc; and test -r .nvmrc;
-    nvm use lts
-  else
-  end
-end
+nvm use lts
 
 # NVM for Linux
 # set --universal nvm_default_version v16
