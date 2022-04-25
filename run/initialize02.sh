@@ -15,4 +15,3 @@ cd ~/dotfiles
 sudo cp sshd/sshd_config /etc/ssh/
 cd ~/
 
-done
