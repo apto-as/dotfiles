@@ -13,7 +13,7 @@ set -gx PATH $GOPATH/bin $PATH
 set -gx PATH $HOME/.cargo/bin $PATH
 
 # NVM for MacOS
-nvm use lts
+nvm use lts > /dev/null
 
 # NVM for Linux
 # set --universal nvm_default_version v16
