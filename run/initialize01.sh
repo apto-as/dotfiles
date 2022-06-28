@@ -6,7 +6,7 @@ set -u
 sudo apt install -y wget curl ufw peco mosh golang nodejs tmux ffmpeg fzf ripgrep gcc
 
 # install nvim fish
-sudo add-apt-repository ppa:neovim-ppa/stable
+sudo add-apt-repository ppa:neovim-ppa/unstable
 sudo add-apt-repository ppa:fish-shell/release-3
 sudo apt update
 sudo apt install -y fish neovim
