@@ -6,7 +6,7 @@ set -u
 sudo apt install -y wget curl ufw peco mosh golang nodejs tmux ffmpeg fzf ripgrep gcc
 
 # install develop base commands
-sudo apt install -y libopenblas-base libopenmpi-dev libomp-dev build-essential software-properties-common libopenblas-dev libpython3-dev python3-pip python3-dev python3-setuptools python3-wheel
+sudo apt install -y libopenblas-base libopenmpi-dev libomp-dev build-essential software-properties-common libopenblas-dev libssl-dev libpython3-dev python3-pip python3-dev python3-setuptools python3-wheel
 
 # install nvim fish
 sudo add-apt-repository ppa:neovim-ppa/unstable
