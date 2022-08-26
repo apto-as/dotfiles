@@ -13,19 +13,77 @@ function set_bg_image
   " | /usr/bin/osascript
 end
 
-alias sbg0  "set_bg_image ~/Pictures/terminal/9dw_wallpaper_v2.0_default01.png"
-alias sbg01 "set_bg_image ~/Pictures/terminal/9dw_wallpaper_v2.0_default01-1.png"
-alias sbg1  "set_bg_image ~/Pictures/terminal/9dw_wallpaper_v2.0_default16.png"
-alias sbg11 "set_bg_image ~/Pictures/terminal/9dw_wallpaper_v2.0_default16-1.png"
-alias sbg2  "set_bg_image ~/Pictures/terminal/9dw_wallpaper_v2.1_awesame01.png"
-alias sbg21 "set_bg_image ~/Pictures/terminal/9dw_wallpaper_v2.1_awesame01-1.png"
-alias sbg3  "set_bg_image ~/Pictures/terminal/9dw_wallpaper_v2.1_awesame02.png"
-alias sbg31 "set_bg_image ~/Pictures/terminal/9dw_wallpaper_v2.1_awesame02-1.png"
-alias sbg4  "set_bg_image ~/Pictures/terminal/9dw_wallpaper_v2.1_awesame03.png"
-alias sbg41 "set_bg_image ~/Pictures/terminal/9dw_wallpaper_v2.1_awesame03-1.png"
-alias sbg5  "set_bg_image ~/Pictures/terminal/9dw_wallpaper_v2.1_awesame04.png"
-alias sbg6  "set_bg_image ~/Pictures/terminal/9dw_wallpaper_v2.0_awesame01.png"
-alias sbg61 "set_bg_image ~/Pictures/terminal/9dw_wallpaper_v2.0_awesame01-1.png"
+function set_bg_image_path
+  if test -d ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v5/$argv[1]/
+    if test -f ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v5/$argv[1]/9dw_wallpaper_v5_$argv[2].png
+      set_bg_image ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v5/$argv[1]/9dw_wallpaper_v5_$argv[2].png
+    else
+      set_bg_image (random choice ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v5/$argv[1]/*.png)
+    end
+  end
+end
+
+function sbx
+  set len (count $argv)
+  if test $len -eq 2
+    set_bg_image_path "xxx$argv[1]" $argv[2]
+  else if test $len -eq 1
+    set_bg_image_path "xxx$argv[1]" '*'
+  else 
+    set_bg_image (random choice ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v5/xxx*/*.png)
+  end
+end
+
+function sbxs
+  set len (count $argv)
+  if test $len -eq 2
+    set_bg_image_path "xxx$argv[1]" "$argv[2]_S"
+  else if test $len -eq 1
+    set_bg_image_path "xxx$argv[1]" '*_S'
+  else 
+    set_bg_image (random choice ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v5/xxx*/*_S.png)
+  end
+end
+
+function sba
+  set len (count $argv)
+  if test $len -eq 2
+    set_bg_image_path "awesame$argv[1]" $argv[2]
+  else if test $len -eq 1
+    set_bg_image_path "awesame$argv[1]" '*'
+  else 
+    set_bg_image (random choice ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v5/awesame*/*.png)
+  end
+end
+
+function sbas
+  set len (count $argv)
+  if test $len -eq 2
+    set_bg_image_path "awesame$argv[1]" "$argv[2]_S"
+  else if test $len -eq 1
+    set_bg_image_path "awesame$argv[1]" '*_S'
+  else 
+    set_bg_image (random choice ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v5/awesame*/*_S.png)
+  end
+end
+
+function sbd
+  set len (count $argv)
+  if test $len -eq 1
+    set_bg_image_path "default" $argv[1]
+  else 
+    set_bg_image (random choice ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v5/default/*.png)
+  end
+end
+
+function sbds
+  set len (count $argv)
+  if test $len -eq 1
+    set_bg_image_path "default" "$argv[1]_S"
+  else
+    set_bg_image (random choice ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v5/default/*_S.png)
+  end
+end
 
 set -gx HOMEBREW_PREFIX "/opt/homebrew";
 set -gx HOMEBREW_CELLAR "/opt/homebrew/Cellar";
