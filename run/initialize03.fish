@@ -18,15 +18,8 @@ nvm use lts
 pip install neovim
 npm install -g neovim
 
-# install pysen
-pip install pysen
-
 # install aws ctl
 sudo apt install -y awscli
 npm install -g awsp
 
-# install nvim plugins
-nvim
-
-# install tmux plugins (Ctrl-B, Ctrl-I)
-tmux
+nvim +PackerSync

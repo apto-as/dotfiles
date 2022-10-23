@@ -6,12 +6,12 @@ set -u
 eval “$(/opt/homebrew/bin/brew shellenv)”
 
 xcode-select --install
-arch -arm64 brew install wget peco mosh golang rust tree-sitter luajit fish neovim nodejs tmux lf ffmpeg bat ripgrep fzf exa gcc
-arch -arm64 brew install --cask kitty hammerspoon
+arch -arm64 brew install wget peco mosh golang rust tree-sitter luajit fish neovim nodejs tmux lf ffmpeg bat ripgrep fzf exa gcc ranger ncdu
+brew install jesseduffield/lazygit/lazygit
 
-# install vim-plugin
-sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
-       https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+# install AstroNvim
+git clone https://github.com/AstroNvim/AstroNvim ~/.config/nvim
+git clone https://github.com/apto-as/astro-nvim-config.git ~/.config/nvim/lua/user
 
 # install ghq
 go get github.com/x-motemen/ghq
