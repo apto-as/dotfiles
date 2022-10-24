@@ -15,6 +15,10 @@ sudo add-apt-repository ppa:longsleep/golang-backports
 sudo apt update
 sudo apt install -y fish neovim golang
 
+# install packer nvim
+git clone --depth 1 https://github.com/wbthomason/packer.nvim\
+ ~/.local/share/nvim/site/pack/packer/start/packer.nvim
+ 
 # install AstroNvim
 git clone https://github.com/AstroNvim/AstroNvim ~/.config/nvim
 git clone https://github.com/apto-as/astro-nvim-config.git ~/.config/nvim/lua/user
