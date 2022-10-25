@@ -7,6 +7,7 @@ sudo apt install -y wget curl ufw peco mosh nodejs tmux ffmpeg fzf ripgrep gcc n
 
 # install develop base commands
 sudo apt install -y libopenblas-base libopenmpi-dev libomp-dev build-essential software-properties-common libopenblas-dev libssl-dev libpython3-dev python3-pip python3-dev python3-setuptools python3-wheel libjpeg-dev zlib1g-dev libavcodec-dev libavformat-dev libswscale-dev
+sudo apt install -y ninja-build gettext libtool libtool-bin autoconf automake cmake g++ pkg-config unzip doxygen
 
 # install nvim fish go
 sudo add-apt-repository ppa:neovim-ppa/unstable
@@ -28,7 +29,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source $HOME/.cargo/env
 
 # install ghq
-go install github.com/x-motemen/ghq
+go install github.com/x-motemen/ghq@latest
 
 # install lazygit
 go install github.com/jesseduffield/lazygit@latest
