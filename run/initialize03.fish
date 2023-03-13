@@ -18,6 +18,8 @@ nvm use lts
 pip install neovim
 npm install -g neovim
 
+npm install -g webtorrent-cli
+
 # install aws ctl
 sudo apt install -y awscli
 npm install -g awsp
