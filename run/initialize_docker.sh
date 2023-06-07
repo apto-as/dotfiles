@@ -18,4 +18,3 @@
 #sudo apt update
 #sudo apt install -y nvidia-docker2
 #sudo systemctl restart docker
-

@@ -10,6 +10,8 @@ sudo ufw allow 49235
 sudo ufw allow 49235/udp
 sudo ufw allow 7001
 sudo ufw allow 7001/udp
+sudo ufw allow 6568
+sudo ufw allow 6568/udp
 sudo ufw allow 7860
 sudo ufw allow 7860/udp
 sudo ufw allow 9999
