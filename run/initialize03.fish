@@ -23,5 +23,3 @@ npm install -g webtorrent-cli
 # install aws ctl
 sudo apt install -y awscli
 npm install -g awsp
-
-nvim +PackerSync

@@ -8,14 +8,9 @@ eval “$(/opt/homebrew/bin/brew shellenv)”
 xcode-select --install
 arch -arm64 brew install wget peco mosh golang rust tree-sitter luajit fish neovim nodejs tmux lf ffmpeg bat ripgrep fzf exa gcc ranger ncdu
 brew install jesseduffield/lazygit/lazygit
-
-# install packer nvim
-git clone --depth 1 https://github.com/wbthomason/packer.nvim\
- ~/.local/share/nvim/site/pack/packer/start/packer.nvim
  
 # install AstroNvim
 git clone https://github.com/AstroNvim/AstroNvim ~/.config/nvim
-git clone https://github.com/apto-as/astro-nvim-config.git ~/.config/nvim/lua/user
 
 # install ghq
 go get github.com/x-motemen/ghq
