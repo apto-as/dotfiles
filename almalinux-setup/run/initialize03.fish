@@ -7,7 +7,8 @@ fisher install decors/fish-ghq
 fisher install jorgebucaran/fish-nvm
 fisher install edc/bass
 fisher install jethrokuan/fzf
-fisher install dracula/fish  
+fisher install dracula/fish
+fisher install evanlucas/fish-kubectl-completions
 fisher install IlanCosman/tide@v5
 
 # intall node latest

@@ -1,0 +1,19 @@
+version: '3.9'
+
+x-base_service: &base_service
+    volumes:
+      - &v1 ./data:/home/apto-as/data
+      - &v2 ./output:/home/apto-as/output
+    stop_signal: SIGKILL
+    ports:
+      - "7860-7999:7860-7999"
+    tty: true
+
+name: dev
+
+services:
+  debug-almalinux:
+    <<: *base_service
+    profiles: ["debug-almalinux"]
+    build: .
+    image: debug-almalinux:latest
