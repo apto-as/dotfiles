@@ -8,7 +8,8 @@ eval “$(/opt/homebrew/bin/brew shellenv)”
 xcode-select --install
 arch -arm64 brew install wget peco mosh golang rust tree-sitter luajit fish neovim nodejs tmux lf ffmpeg bat ripgrep fzf exa gcc ranger ncdu
 brew install jesseduffield/lazygit/lazygit
- 
+brew install jandedobbeleer/oh-my-posh/oh-my-posh
+
 # install AstroNvim
 git clone https://github.com/AstroNvim/AstroNvim ~/.config/nvim
 

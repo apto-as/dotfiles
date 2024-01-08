@@ -2,30 +2,10 @@
 
 set -u
 
-# setup anydesk repo
-sudo tee /etc/yum.repos.d/anydesk.repo<<EOF
-[anydesk]
-name=AnyDesk CentOS - stable
-baseurl=http://rpm.anydesk.com/centos/x86_64/
-gpgcheck=1
-repo_gpgcheck=1
-gpgkey=https://keys.anydesk.com/repos/RPM-GPG-KEY
-EOF
-
-# install epel repo
-sudo dnf config-manager --set-enabled powertools
-sudo dnf install epel-release epel-next-release
-sudo dnf install util-linux-user
-
-# last update
-sudo dnf update -y
-
 # install base commands
-sudo dnf group install -y "Development Tools"
 sudo dnf install -y bind-utils net-tools rsync wget openssh-server curl ufw mosh nodejs tmux ripgrep ncdu
 
 # install ffmpe almalinux9の場合
-#sudo dnf config-manager --set-enabled crb
 #sudo dnf install --nogpgcheck https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-$(rpm -E %rhel).noarch.rpm -y
 #sudo dnf install --nogpgcheck https://mirrors.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-$(rpm -E %rhel).noarch.rpm -y
 #sudo dnf install ffmpeg -y
@@ -61,14 +41,30 @@ sudo ln -s /squashfs-root/AppRun /usr/bin/nvim
 sudo dnf config-manager --add-repo https://download.opensuse.org/repositories/shells:fish:release:3/CentOS_8/shells:fish:release:3.repo
 sudo dnf install -y fish
 
-# install go
-VERSION=1.21.5
-wget https://storage.googleapis.com/golang/go${VERSION}.linux-amd64.tar.gz
-sudo tar -C /usr/local -xzf go${VERSION}.linux-amd64.tar.gz
-source ${HOME}/go
+# install go バージョンは都度最新を調べて変えること。
+GO_VERSION=1.21.5
+wget https://storage.googleapis.com/golang/go${GO_VERSION}.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz
 
 # install AstroNvim
 git clone https://github.com/AstroNvim/AstroNvim ~/.config/nvim
+
+# cuda install almalinux9の場合
+#CUDA_DISTRO=rhel9
+#CUDA_ARCH=x86_64
+#CUDA_VERSION=cuda12.2
+#CUDNN_VERSION=8.9.7.*
+
+# cuda install almalinux8の場合
+CUDA_DISTRO=rhel8
+CUDA_ARCH=x86_64
+CUDA_VERSION=cuda12.2
+CUDNN_VERSION=8.9.7.*
+
+sudo dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/${CUDA_DISTRO}/${CUDA_ARCH}/cuda-${CUDA_DISTRO}.repo
+sudo dnf install cuda
+sudo dnf install libcudnn8-${CUDNN_VERSION}-1.${CUDA_VERSION}
+sudo dnf install libcudnn8-devel-${CUDNN_VERSION}-1.${CUDA_VERSION}
 
 # install rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
@@ -83,18 +79,15 @@ source $HOME/.cargo/env
 # install tpm
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
-# install kitty exa
+# install exa
 cargo install exa
-
-# install ranger
-pip install ranger-fm
 
 # change shell to fish
 echo $(which fish) | sudo tee -a /etc/shells
 chsh -s $(which fish)
 
 #dotfiles install
-cd ~/dotfiles
+cd ~/dotfiles/almalinux-setup/
 
 cp .gitconfig ~/
 cp .gitignore ~/
@@ -104,6 +97,8 @@ cp .tmux.conf.powerline ~/
 cp -RT .config/ ~/.config/
 
 cd ~
+
+sudo dnf clean all
 
 # system reboot
 sudo reboot

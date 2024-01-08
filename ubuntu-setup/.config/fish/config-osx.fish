@@ -1,3 +1,10 @@
+set -xg OPENAI_API_KEY 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
+set -gx LDFLAGS "-L/opt/homebrew/opt/libxml2/lib"
+set -gx CPPFLAGS "-I/opt/homebrew/opt/libxml2/include"
+
+alias tailscale="/Applications/Tailscale.app/Contents/MacOS/Tailscale"
+
+
 if type -q exa
   alias ll "exa -l -g --icons"
   alias lla "ll -a"
@@ -14,11 +21,11 @@ function set_bg_image
 end
 
 function set_bg_image_path
-  if test -d ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v5/$argv[1]/
-    if test -f ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v5/$argv[1]/9dw_wallpaper_v5_$argv[2].png
-      set_bg_image ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v5/$argv[1]/9dw_wallpaper_v5_$argv[2].png
+  if test -d ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v6/$argv[1]/
+    if test -f ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v6/$argv[1]/9dw_wallpaper_v6_$argv[2].png
+      set_bg_image ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v6/$argv[1]/9dw_wallpaper_v6_$argv[2].png
     else
-      set_bg_image (random choice ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v5/$argv[1]/*.png)
+      set_bg_image (random choice ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v6/$argv[1]/*.png)
     end
   end
 end
@@ -30,7 +37,7 @@ function sbx
   else if test $len -eq 1
     set_bg_image_path "xxx$argv[1]" '*'
   else 
-    set_bg_image (random choice ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v5/xxx*/*.png)
+    set_bg_image (random choice ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v6/xxx*/*.png)
   end
 end
 
@@ -41,7 +48,7 @@ function sbxs
   else if test $len -eq 1
     set_bg_image_path "xxx$argv[1]" '*_S'
   else 
-    set_bg_image (random choice ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v5/xxx*/*_S.png)
+    set_bg_image (random choice ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v6/xxx*/*_S.png)
   end
 end
 
@@ -52,7 +59,7 @@ function sba
   else if test $len -eq 1
     set_bg_image_path "awesame$argv[1]" '*'
   else 
-    set_bg_image (random choice ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v5/awesame*/*.png)
+    set_bg_image (random choice ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v6/awesame*/*.png)
   end
 end
 
@@ -63,7 +70,7 @@ function sbas
   else if test $len -eq 1
     set_bg_image_path "awesame$argv[1]" '*_S'
   else 
-    set_bg_image (random choice ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v5/awesame*/*_S.png)
+    set_bg_image (random choice ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v6/awesame*/*_S.png)
   end
 end
 
@@ -72,7 +79,7 @@ function sbd
   if test $len -eq 1
     set_bg_image_path "default" $argv[1]
   else 
-    set_bg_image (random choice ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v5/default/*.png)
+    set_bg_image (random choice ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v6/default/*.png)
   end
 end
 
@@ -81,7 +88,7 @@ function sbds
   if test $len -eq 1
     set_bg_image_path "default" "$argv[1]_S"
   else
-    set_bg_image (random choice ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v5/default/*_S.png)
+    set_bg_image (random choice ~/Pictures/wallpaper/terminal_back_image/9dw_wallpaper_v6/default/*_S.png)
   end
 end
 
