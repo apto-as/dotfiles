@@ -1,12 +1,13 @@
 #!/usr/bin/env fish
 
 sudo curl -s https://ohmyposh.dev/install.sh | sudo bash -s
-git clone https://github.com/JanDeDobbeleer/oh-my-posh.git
 
-mkdir ~/.posh
-mkdir ~/.posh/themes/
-cp ~/oh-my-posh/themes/* ~/.posh/themes/
-oh-my-posh init fish --config ~/.posh/themes/night-owl.omp.json | source
+mkdir ~/.posh/
+cd ~/dotfiles/almalinux-setup/
+cp -R .posh/ ~/.posh/
+cd ~
+
+oh-my-posh init fish --config ~/.posh/themes/tsuyoshi.omp.json | source
 
 # fisher plugins install
 fisher install oh-my-fish/plugin-peco
