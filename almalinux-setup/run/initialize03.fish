@@ -4,10 +4,13 @@ sudo curl -s https://ohmyposh.dev/install.sh | sudo bash -s
 
 mkdir ~/.posh/
 cd ~/dotfiles/almalinux-setup/
-cp -R .posh/ ~/.posh/
+cp -r .posh/themes/ ~/.posh/
 cd ~
 
+conda config --set changeps1 False
+
 oh-my-posh init fish --config ~/.posh/themes/tsuyoshi.omp.json | source
+exec fish
 
 # fisher plugins install
 fisher install oh-my-fish/plugin-peco
@@ -32,3 +35,5 @@ npm install -g webtorrent-cli
 # install aws ctl
 #sudo apt install -y awscli
 #npm install -g awsp
+
+cargo install csvlens

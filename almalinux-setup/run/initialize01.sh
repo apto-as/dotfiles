@@ -3,7 +3,27 @@
 set -u
 
 # install base commands
-sudo dnf install -y bind-utils net-tools rsync wget openssh-server curl ufw mosh nodejs tmux ripgrep ncdu
+sudo dnf install -y bind-utils net-tools rsync wget openssh-server curl ufw mosh nodejs tmux ripgrep ncdu gcc
+
+# install develop base commands
+sudo dnf install -y ninja-build gettext cmake unzip doxygen
+
+# cuda install almalinux9の場合
+#CUDA_DISTRO=rhel9
+#CUDA_ARCH=x86_64
+#CUDA_VERSION=cuda12.2
+#CUDNN_VERSION=8.9.7.*
+
+# cuda install almalinux8の場合
+CUDA_DISTRO=rhel8
+CUDA_ARCH=x86_64
+CUDA_VERSION=cuda12.2
+CUDNN_VERSION=8.9.7.*
+
+sudo dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/${CUDA_DISTRO}/${CUDA_ARCH}/cuda-${CUDA_DISTRO}.repo
+sudo dnf install cuda
+sudo dnf install libcudnn8-${CUDNN_VERSION}-1.${CUDA_VERSION}
+sudo dnf install libcudnn8-devel-${CUDNN_VERSION}-1.${CUDA_VERSION}
 
 # install ffmpe almalinux9の場合
 #sudo dnf install --nogpgcheck https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-$(rpm -E %rhel).noarch.rpm -y
@@ -26,9 +46,6 @@ sudo ln -s /usr/local/bin/peco_linux_amd64/peco /usr/local/bin/peco
 git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 ~/.fzf/install
 
-# install develop base commands
-sudo dnf install -y ninja-build gettext cmake unzip doxygen
-
 # install nvim 
 curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
 chmod u+x nvim.appimage
@@ -48,23 +65,6 @@ sudo tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz
 
 # install AstroNvim
 git clone https://github.com/AstroNvim/AstroNvim ~/.config/nvim
-
-# cuda install almalinux9の場合
-#CUDA_DISTRO=rhel9
-#CUDA_ARCH=x86_64
-#CUDA_VERSION=cuda12.2
-#CUDNN_VERSION=8.9.7.*
-
-# cuda install almalinux8の場合
-CUDA_DISTRO=rhel8
-CUDA_ARCH=x86_64
-CUDA_VERSION=cuda12.2
-CUDNN_VERSION=8.9.7.*
-
-sudo dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/${CUDA_DISTRO}/${CUDA_ARCH}/cuda-${CUDA_DISTRO}.repo
-sudo dnf install cuda
-sudo dnf install libcudnn8-${CUDNN_VERSION}-1.${CUDA_VERSION}
-sudo dnf install libcudnn8-devel-${CUDNN_VERSION}-1.${CUDA_VERSION}
 
 # install rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
@@ -87,14 +87,14 @@ echo $(which fish) | sudo tee -a /etc/shells
 chsh -s $(which fish)
 
 #dotfiles install
-cd ~/dotfiles/almalinux-setup/
+cd ~/dotfiles/
 
 cp .gitconfig ~/
 cp .gitignore ~/
 cp .tmux.conf ~/
 cp .tmux.conf.osx ~/
 cp .tmux.conf.powerline ~/
-cp -RT .config/ ~/.config/
+cp -RT almalinux-setup/.config/ ~/.config/
 
 cd ~
 

@@ -87,4 +87,4 @@ if test -f $LOCAL_CONFIG
   source $LOCAL_CONFIG
 end
 
-oh-my-posh init fish --config ~/.posh/themes/night-owl.omp.json | source
+oh-my-posh init fish --config ~/.posh/themes/tsuyoshi.omp.json | source
