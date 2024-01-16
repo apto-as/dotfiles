@@ -1,4 +1,3 @@
-set -xg OPENAI_API_KEY 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
 set -gx LDFLAGS "-L/opt/homebrew/opt/libxml2/lib"
 set -gx CPPFLAGS "-I/opt/homebrew/opt/libxml2/include"
 

@@ -6,14 +6,14 @@
       "newline": true,
       "segments": [
         {
-          "background": "#FEF5ED",
-          "foreground": "#011627",
+          "background": "#6272a4",
+          "foreground": "#f8f8f2",
           "leading_diamond": "\ue0b2",
           "properties": {
             "macos": "\uF179 ",
             "linux": "\uF17C ",
             "windows": "\uE62A ",
-            "alma": "\uF31D ",
+            "alma": "\uF31D  ",
             "alpine": "\uF300 ",
             "aosc": "\uF301 ",
             "arch": "\uF303 ",
@@ -42,26 +42,18 @@
           "type": "os"
         },
         {
-          "background": "#FEF5ED",
-          "foreground": "#011627",
+          "background": "#6272a4",
+          "foreground": "#f8f8f2",
           "style": "powerline",
           "template": " \uf489 {{ .Name }} ",
           "powerline_symbol": "\ue0b0",
           "type": "shell"
         },
         {
-          "background": "#516BEB",
-          "foreground": "#ffffff",
+          "background": "#bd93f9",
+          "foreground": "#282a36",
           "style": "powerline",
-          "template": " \ue266  CPU: {{ round .PhysicalPercentUsed .Precision }}% |",
-          "powerline_symbol": "\ue0b0",
-          "type": "sysinfo"
-        },
-        {
-          "background": "#516BEB",
-          "foreground": "#ffffff",
-          "style": "powerline",
-          "template": "MEM:{{ round .PhysicalPercentUsed .Precision }}% ({{ (div ((sub .PhysicalTotalMemory .PhysicalFreeMemory)|float64) 1073741824.0) }}/{{ (div .PhysicalTotalMemory 1073741824.0) }}GB)",
+          "template": " \ue266  CPU: {{ round .PhysicalPercentUsed .Precision }}% | MEM:{{ round .PhysicalPercentUsed .Precision }}% ({{ (div ((sub .PhysicalTotalMemory .PhysicalFreeMemory)|float64) 1073741824.0) }}/{{ (div .PhysicalTotalMemory 1073741824.0) }}GB) ",
           "powerline_symbol": "\ue0b0",
           "type": "sysinfo"
         },
@@ -214,12 +206,12 @@
           "type": "kotlin"
         },
         {
-          "background": "#316ce4",
-          "foreground": "#ffffff",
+          "background": "#ffb86c",
+          "foreground": "#282a36",
           "leading_diamond": "\ue0b2",
           "style": "diamond",
-          "template": "\uf308 {{.Context}}::{{if .Namespace}}{{.Namespace}}{{else}}default{{end}} ",
-          "trailing_diamond": "<transparent,#316ce4>\ue0b2</>",
+          "template": "\uf308 {{.Context}}{{if .Namespace}} :: {{.Namespace}}{{end}} ",
+          "trailing_diamond": "<transparent,#ffb86c>\ue0b2</>",
           "type": "kubectl"
         },
         {
@@ -236,6 +228,7 @@
           "foreground": "#3C873A",
           "leading_diamond": "\ue0b2",
           "properties": {
+            "home_enabled": true,
             "display_mode": "always",
             "fetch_package_manager": true,
             "npm_icon": "<#cc3a3a>\ue71e</> ",
@@ -279,6 +272,7 @@
           "leading_diamond": "\ue0b2",
           "style": "diamond",
           "properties": {
+            "home_enabled": true,
             "display_mode": "always"
           },
           "template": "\ue235  {{ if .Error }}{{ .Error }}{{ else }}{{ if .Venv }}{{ .Venv }} {{ end }}{{ .Full }}{{ end }}",
@@ -322,8 +316,8 @@
           "type": "swift"
         },
         {
-          "background": "#575656",
-          "foreground": "#d6deeb",
+          "background": "#ff79c6",
+          "foreground": "#f8f8f2",
           "leading_diamond": "\ue0b2",
           "properties": {
             "style": "roundrock",

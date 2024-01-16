@@ -9,9 +9,4 @@ function fish_user_key_bindings
   bind \c] __ghq_repository_search
   bind \cb __fzf_select_branch
 
-  # vim-like
-  bind \cl forward-char
-
-  # prevent iterm2 from closing when typing Ctrl-D (EOF)
-  bind \cd delete-char
 end
