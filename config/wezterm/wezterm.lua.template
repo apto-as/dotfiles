@@ -1,0 +1,200 @@
+-- ============================================================================
+-- Wezterm Configuration Template - SAFE FOR PUBLIC REPOSITORY
+-- Date: 2025-10-28
+-- Version: 1.0
+--
+-- IMPORTANT: This is a TEMPLATE file.
+-- Copy to wezterm.lua and customize paths for your system.
+-- ============================================================================
+
+local wezterm = require('wezterm')
+local config = wezterm.config_builder()
+
+-- ============================================================================
+-- パフォーマンス最適化設定
+-- ============================================================================
+
+config.front_end = "WebGpu"
+config.webgpu_power_preference = "HighPerformance"
+config.animation_fps = 1
+config.cursor_blink_ease_in = "Constant"
+config.cursor_blink_ease_out = "Constant"
+config.scrollback_lines = 10000
+config.check_for_updates = false
+
+-- ============================================================================
+-- Draculaテーマ設定（ビルトイン公式版）
+-- ============================================================================
+
+config.color_scheme = "Dracula"
+
+-- ============================================================================
+-- フォント設定（PlemolJP Console NF）
+-- ============================================================================
+
+config.font = wezterm.font_with_fallback({
+  {
+    family = "PlemolJP Console NF",
+    weight = "Regular",
+    harfbuzz_features = { "calt=1", "clig=1", "liga=1" },
+  },
+  "JetBrains Mono",
+  "Noto Sans CJK JP",
+})
+
+config.font_size = 14.0
+config.line_height = 1.2
+config.freetype_load_target = "Normal"
+config.freetype_render_target = "Normal"
+
+-- ============================================================================
+-- 背景画像設定（SECURE: Uses HOME environment variable）
+-- ============================================================================
+
+-- SECURITY NOTE: Use environment variable instead of hardcoded path
+local home = os.getenv("HOME") or os.getenv("USERPROFILE")
+local wallpaper_path = home .. "/Pictures/wallpaper/os_waallpaper_v3.png"
+
+config.background = {
+  {
+    source = {
+      File = wallpaper_path,
+    },
+    height = "Cover",
+    width = "Cover",
+    vertical_align = "Middle",
+    horizontal_align = "Center",
+    repeat_x = "NoRepeat",
+    repeat_y = "NoRepeat",
+    hsb = {
+      brightness = 0.3,
+      hue = 1.0,
+      saturation = 1.0,
+    },
+    opacity = 0.95,
+  },
+}
+
+-- ============================================================================
+-- ウィンドウ設定
+-- ============================================================================
+
+config.window_decorations = "TITLE | RESIZE"
+
+config.window_padding = {
+  left = 8,
+  right = 8,
+  top = 8,
+  bottom = 8,
+}
+
+wezterm.on("gui-startup", function(cmd)
+  local tab, pane, window = wezterm.mux.spawn_window(cmd or {})
+  window:gui_window():maximize()
+end)
+
+-- ============================================================================
+-- タブバー設定
+-- ============================================================================
+
+config.enable_tab_bar = true
+config.use_fancy_tab_bar = false
+config.tab_bar_at_bottom = false
+config.hide_tab_bar_if_only_one_tab = true
+config.tab_max_width = 32
+
+-- ============================================================================
+-- tmux統合最適化
+-- ============================================================================
+
+config.enable_scroll_bar = false
+
+-- ============================================================================
+-- キーバインド設定
+-- ============================================================================
+
+config.keys = {
+  {
+    key = "k",
+    mods = "CMD",
+    action = wezterm.action.ClearScrollback("ScrollbackAndViewport"),
+  },
+  {
+    key = "t",
+    mods = "CMD",
+    action = wezterm.action.SpawnTab("CurrentPaneDomain"),
+  },
+  {
+    key = "b",
+    mods = "CTRL",
+    action = wezterm.action.SendKey { key = "b", mods = "CTRL" },
+  },
+}
+
+-- ============================================================================
+-- ベル設定
+-- ============================================================================
+
+config.audible_bell = "Disabled"
+config.visual_bell = {
+  fade_in_duration_ms = 0,
+  fade_out_duration_ms = 0,
+}
+
+-- ============================================================================
+-- その他の設定
+-- ============================================================================
+
+config.automatically_reload_config = true
+
+-- ============================================================================
+-- タブデザイン（Draculaテーマ + 背景画像透過）
+-- ============================================================================
+
+config.colors = {
+  tab_bar = {
+    inactive_tab_edge = "none",
+    background = 'rgba(0, 0, 0, 0)',
+  },
+}
+
+config.window_frame = {
+  inactive_titlebar_bg = 'rgba(0, 0, 0, 0)',
+  active_titlebar_bg = 'rgba(0, 0, 0, 0)',
+  font = wezterm.font({ family = 'PlemolJP Console NF', weight = 'Bold' }),
+  font_size = 12.0,
+}
+
+local SOLID_LEFT_ARROW = wezterm.nerdfonts.ple_lower_right_triangle
+local SOLID_RIGHT_ARROW = wezterm.nerdfonts.ple_upper_left_triangle
+
+wezterm.on('format-tab-title', function(tab, tabs, panes, config, hover, max_width)
+  local background = 'rgba(68, 71, 90, 0.8)'
+  local foreground = '#f8f8f2'
+  local edge_background = 'rgba(0, 0, 0, 0)'
+
+  if tab.is_active then
+    background = 'rgba(189, 147, 249, 0.9)'
+    foreground = '#282a36'
+  elseif hover then
+    background = 'rgba(98, 114, 164, 0.8)'
+    foreground = '#f8f8f2'
+  end
+
+  local edge_foreground = background
+  local title = '   ' .. wezterm.truncate_right(tab.active_pane.title, max_width - 1) .. '   '
+
+  return {
+    { Background = { Color = edge_background } },
+    { Foreground = { Color = edge_foreground } },
+    { Text = SOLID_LEFT_ARROW },
+    { Background = { Color = background } },
+    { Foreground = { Color = foreground } },
+    { Text = title },
+    { Background = { Color = edge_background } },
+    { Foreground = { Color = edge_foreground } },
+    { Text = SOLID_RIGHT_ARROW },
+  }
+end)
+
+return config

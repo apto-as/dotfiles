@@ -1,0 +1,11 @@
+{
+  "hostname": "Mac",
+  "type": "macbook",
+  "description": "Primary development machine",
+  "screen": {
+    "resolution": "2560x1600",
+    "dpi": "Retina"
+  },
+  "created": "2025-10-28",
+  "last_updated": "2025-10-28"
+}
