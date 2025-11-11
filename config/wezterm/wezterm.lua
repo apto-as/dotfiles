@@ -224,6 +224,57 @@ wezterm.on('format-tab-title', function(tab, tabs, panes, config, hover, max_wid
 end)
 
 -- ============================================================================
+-- Zellij Integration (Terminal Multiplexer)
+-- ============================================================================
+-- Auto-start Zellij on Wezterm launch
+-- Control via environment variable: WEZTERM_ZELLIJ_AUTO_START (default: true)
+--
+-- To disable: export WEZTERM_ZELLIJ_AUTO_START=false
+-- To re-enable: unset WEZTERM_ZELLIJ_AUTO_START
+--
+-- Keybindings:
+--   Ctrl+a z  : Toggle Zellij (attach/detach)
+--   Ctrl+g    : Zellij prefix (inside Zellij)
+-- ============================================================================
+
+-- Check if Zellij auto-start is enabled (default: true)
+local zellij_auto_start = os.getenv('WEZTERM_ZELLIJ_AUTO_START')
+if zellij_auto_start == nil then
+  zellij_auto_start = 'true'  -- Default: enabled
+end
+
+-- Only auto-start if:
+-- 1. Auto-start is enabled
+-- 2. Not already inside a Zellij session (prevent nested sessions)
+if zellij_auto_start:lower() ~= 'false' and os.getenv('ZELLIJ') == nil then
+  -- Default program: Launch Zellij or attach to existing session
+  -- Zellij will auto-attach if session exists, or create new one
+  config.default_prog = { 'zellij', 'attach', '--create' }
+
+  wezterm.log_info('Zellij auto-start enabled. Use WEZTERM_ZELLIJ_AUTO_START=false to disable.')
+else
+  if os.getenv('ZELLIJ') then
+    wezterm.log_info('Already inside Zellij session. Skipping auto-start.')
+  else
+    wezterm.log_info('Zellij auto-start disabled via WEZTERM_ZELLIJ_AUTO_START.')
+  end
+end
+
+-- ============================================================================
+-- Keybindings for Zellij Integration
+-- ============================================================================
+config.keys = {
+  -- Ctrl+a z: Quick Zellij attach/launch
+  {
+    key = 'z',
+    mods = 'CTRL',
+    action = wezterm.action.SpawnCommandInNewTab {
+      args = { 'zellij', 'attach', '--create' },
+    },
+  },
+}
+
+-- ============================================================================
 -- Machine-Specific Configuration Loading
 -- ============================================================================
 -- Load local.lua for machine-specific settings (background, window size, etc.)

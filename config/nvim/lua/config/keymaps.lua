@@ -1,3 +1,22 @@
 -- Keymaps are automatically loaded on the VeryLazy event
 -- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
 -- Add any additional keymaps here
+
+-- ============================================================================
+-- Zellij Compatibility Notes
+-- ============================================================================
+-- Zellij keybindings (terminal multiplexer):
+--   Ctrl+g       : Zellij prefix (enters tmux mode)
+--   Ctrl+g + h/j/k/l : Navigate panes
+--
+-- Neovim keybindings (default LazyVim):
+--   Ctrl+w + h/j/k/l : Navigate windows (Vim default)
+--   Ctrl+w + ...     : Window management
+--
+-- ✅ NO CONFLICTS: Zellij uses Ctrl+g, Neovim uses Ctrl+w
+--
+-- If adding custom keybindings:
+--   ❌ AVOID: Ctrl+g (reserved for Zellij)
+--   ✅ SAFE:  Ctrl+w prefix (Vim standard)
+--   ✅ SAFE:  <leader> prefix (LazyVim standard)
+-- ============================================================================
