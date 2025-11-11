@@ -1,0 +1,95 @@
+// ============================================================================
+// Dracula Theme for Zellij
+// Official Dracula Color Palette
+// Consistent with Wezterm & Neovim configurations
+// ============================================================================
+//
+// Dracula Official Colors:
+// - Background:    #282a36
+// - Current Line:  #44475a
+// - Foreground:    #f8f8f2
+// - Comment:       #6272a4
+// - Cyan:          #8be9fd
+// - Green:         #50fa7b
+// - Orange:        #ffb86c
+// - Pink:          #ff79c6
+// - Purple:        #bd93f9
+// - Red:           #ff5555
+// - Yellow:        #f1fa8c
+//
+// Reference: https://draculatheme.com/contribute
+// ============================================================================
+
+themes {
+    dracula {
+        // ==========================
+        // Base Colors
+        // ==========================
+        fg "#f8f8f2"        // Foreground: Dracula white
+        bg "#282a36"        // Background: Dracula dark background
+
+        // ==========================
+        // ANSI Colors (Normal)
+        // ==========================
+        black "#282a36"     // Black: Same as background
+        red "#ff5555"       // Red: Dracula red
+        green "#50fa7b"     // Green: Dracula green
+        yellow "#f1fa8c"    // Yellow: Dracula yellow
+        blue "#bd93f9"      // Blue: Dracula purple (ANSI blue → purple)
+        magenta "#ff79c6"   // Magenta: Dracula pink
+        cyan "#8be9fd"      // Cyan: Dracula cyan
+        white "#f8f8f2"     // White: Dracula foreground
+
+        // ==========================
+        // ANSI Colors (Bright)
+        // ==========================
+        bright_black "#6272a4"      // Bright Black: Dracula comment (darker gray)
+        bright_red "#ff6e6e"        // Bright Red: Lighter red
+        bright_green "#69ff94"      // Bright Green: Lighter green
+        bright_yellow "#ffffa5"     // Bright Yellow: Lighter yellow
+        bright_blue "#d6acff"       // Bright Blue: Lighter purple
+        bright_magenta "#ff92df"    // Bright Magenta: Lighter pink
+        bright_cyan "#a4ffff"       // Bright Cyan: Lighter cyan
+        bright_white "#ffffff"      // Bright White: Pure white
+
+        // ==========================
+        // Dracula Special Colors
+        // ==========================
+        orange "#ffb86c"    // Orange: Dracula orange (for special highlights)
+    }
+}
+
+// ============================================================================
+// Usage
+// ============================================================================
+//
+// This theme is automatically loaded by config.kdl:
+//   theme "dracula"
+//
+// Color Application in Zellij:
+// - fg/bg: Main text and background
+// - black/bright_black: Borders and subtle elements
+// - red/bright_red: Errors and warnings
+// - green/bright_green: Success messages
+// - yellow/bright_yellow: Info and highlights
+// - blue/bright_blue: Active pane indicators
+// - magenta/bright_magenta: Mode indicators
+// - cyan/bright_cyan: Tab titles and accents
+// - white/bright_white: Prominent text
+// - orange: Special highlights and notifications
+//
+// ============================================================================
+// Consistency Notes
+// ============================================================================
+//
+// This theme matches:
+// - Wezterm: config.color_scheme = "Dracula" (builtin)
+// - Neovim: LazyVim with Dracula theme
+//
+// Visual Hierarchy:
+// 1. Active elements: Purple (#bd93f9), Pink (#ff79c6)
+// 2. Important text: Foreground (#f8f8f2), White (#ffffff)
+// 3. Subtle elements: Comment (#6272a4), Current Line (#44475a)
+// 4. Semantic colors: Red (errors), Green (success), Yellow (warnings)
+//
+// ============================================================================
