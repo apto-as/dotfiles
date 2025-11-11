@@ -181,6 +181,27 @@ vendor/bundle
 **/assets/wallpapers/machines/*/personal-*
 
 # ==========================
+# Zellij (Terminal Multiplexer)
+# ==========================
+# Session data (contains command history, may include credentials)
+**/.cache/zellij/
+**/zellij/sessions/
+
+# Personal layouts with sensitive paths or project information
+**/zellij/layouts/*-personal.kdl
+**/zellij/layouts/*-work.kdl
+**/zellij/layouts/*-client-*.kdl
+
+# Downloaded plugins (verify integrity before committing)
+**/zellij/plugins/*.wasm
+!**/zellij/plugins/zellij-*.wasm  # Official Zellij plugins OK
+
+# Local configuration overrides
+**/zellij/config.local.kdl
+**/zellij/.local.kdl
+**/zellij/config-*.local.kdl
+
+# ==========================
 # Git LFS
 # ==========================
 # Large binary files
