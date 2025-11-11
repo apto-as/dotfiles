@@ -1,0 +1,284 @@
+// ============================================================================
+// Zellij Configuration - Dotfiles v1.1.0
+// Purpose: Modern terminal multiplexer configuration
+// Theme: Dracula (consistent with Wezterm & Neovim)
+// Keybinding Philosophy: Ctrl+g prefix (ergonomic, non-conflicting)
+// ============================================================================
+
+// ==========================
+// Themes
+// ==========================
+// Load Dracula theme for consistency across terminal stack
+theme "dracula"
+
+// Additional themes can be loaded from themes/ directory
+// themes {
+//     dracula { path "themes/dracula.kdl"; }
+// }
+
+// ==========================
+// Default Behavior
+// ==========================
+// Default shell (respects $SHELL environment variable)
+// default_shell "zsh"
+
+// Default layout to load on startup
+default_layout "default"
+
+// Default mode when Zellij starts
+default_mode "normal"
+
+// ==========================
+// Session Management
+// ==========================
+// Session name serialization
+// on_force_close "quit"  // Options: "quit" or "detach"
+
+// Auto-layout behavior
+// auto_layout true
+
+// Session serialization (save/restore sessions)
+// session_serialization false  // SECURITY: Disabled by default (Hestia requirement)
+
+// ==========================
+// UI Configuration
+// ==========================
+// Show pane frames (borders around panes)
+pane_frames true
+
+// Simplified UI (minimal status bar)
+simplified_ui false
+
+// Default editor for `zellij edit`
+// Uses $EDITOR environment variable by default
+
+// ==========================
+// Clipboard Configuration
+// ==========================
+// Clipboard provider (auto-detected on macOS)
+copy_command "pbcopy"  // macOS clipboard
+// copy_command "wl-copy"     // Wayland
+// copy_command "xclip -selection clipboard"  // X11
+
+// Copy on selection (like tmux)
+copy_on_select true
+
+// ==========================
+// Mouse Support
+// ==========================
+// Enable mouse support
+mouse_mode true
+
+// Scroll sensitivity
+scroll_buffer_size 10000
+
+// ==========================
+// Keybindings
+// ==========================
+// Primary keybinding mode: Ctrl+g (ergonomic, doesn't conflict with common tools)
+//
+// Philosophy:
+// - Ctrl+g: Zellij prefix (similar to tmux's Ctrl+b, but more ergonomic)
+// - Ctrl+a: Reserved for shell (jump to line start)
+// - Ctrl+b: Common in Vim/Emacs (backward char)
+//
+// Common operations:
+// - Ctrl+g + c: New pane
+// - Ctrl+g + x: Close pane
+// - Ctrl+g + arrows: Navigate panes
+// - Ctrl+g + [: Scroll mode
+// - Ctrl+g + d: Detach session
+// - Ctrl+g + ?: Help (show keybindings)
+
+keybinds {
+    // Unbind dangerous defaults (Hestia security requirement)
+    unbind "Ctrl q"  // Prevent accidental quit
+
+    // Normal mode (default)
+    normal {
+        // Prefix key: Ctrl+g enters "tmux" mode
+        bind "Ctrl g" { SwitchToMode "tmux"; }
+    }
+
+    // Tmux mode (activated by Ctrl+g prefix)
+    tmux {
+        // Pane management
+        bind "c" { NewPane; SwitchToMode "normal"; }
+        bind "x" { CloseFocus; SwitchToMode "normal"; }
+        bind "z" { ToggleFocusFullscreen; SwitchToMode "normal"; }
+
+        // Navigation
+        bind "h" { MoveFocus "Left"; SwitchToMode "normal"; }
+        bind "j" { MoveFocus "Down"; SwitchToMode "normal"; }
+        bind "k" { MoveFocus "Up"; SwitchToMode "normal"; }
+        bind "l" { MoveFocus "Right"; SwitchToMode "normal"; }
+        bind "Left" { MoveFocus "Left"; SwitchToMode "normal"; }
+        bind "Down" { MoveFocus "Down"; SwitchToMode "normal"; }
+        bind "Up" { MoveFocus "Up"; SwitchToMode "normal"; }
+        bind "Right" { MoveFocus "Right"; SwitchToMode "normal"; }
+
+        // Splitting
+        bind "|" { NewPane "Right"; SwitchToMode "normal"; }
+        bind "-" { NewPane "Down"; SwitchToMode "normal"; }
+        bind "\"" { NewPane "Down"; SwitchToMode "normal"; }
+        bind "%" { NewPane "Right"; SwitchToMode "normal"; }
+
+        // Resize mode
+        bind "r" { SwitchToMode "resize"; }
+
+        // Scroll mode
+        bind "[" { SwitchToMode "scroll"; }
+
+        // Session management
+        bind "d" { Detach; }
+        bind "w" { SwitchToMode "session"; }
+
+        // Help
+        bind "?" { SwitchToMode "tmux"; }  // Show keybindings
+
+        // Tab management
+        bind "t" { NewTab; SwitchToMode "normal"; }
+        bind "," { SwitchToMode "renametab"; }
+        bind "1" { GoToTab 1; SwitchToMode "normal"; }
+        bind "2" { GoToTab 2; SwitchToMode "normal"; }
+        bind "3" { GoToTab 3; SwitchToMode "normal"; }
+        bind "4" { GoToTab 4; SwitchToMode "normal"; }
+        bind "5" { GoToTab 5; SwitchToMode "normal"; }
+        bind "6" { GoToTab 6; SwitchToMode "normal"; }
+        bind "7" { GoToTab 7; SwitchToMode "normal"; }
+        bind "8" { GoToTab 8; SwitchToMode "normal"; }
+        bind "9" { GoToTab 9; SwitchToMode "normal"; }
+
+        // Back to normal
+        bind "Esc" { SwitchToMode "normal"; }
+        bind "Enter" { SwitchToMode "normal"; }
+    }
+
+    // Scroll mode (for history navigation)
+    scroll {
+        bind "e" { EditScrollback; SwitchToMode "normal"; }
+        bind "Esc" { SwitchToMode "normal"; }
+        bind "Ctrl c" { ScrollToBottom; SwitchToMode "normal"; }
+        bind "j" "Down" { ScrollDown; }
+        bind "k" "Up" { ScrollUp; }
+        bind "Ctrl f" "PageDown" { PageScrollDown; }
+        bind "Ctrl b" "PageUp" { PageScrollUp; }
+        bind "d" { HalfPageScrollDown; }
+        bind "u" { HalfPageScrollUp; }
+    }
+
+    // Resize mode
+    resize {
+        bind "h" "Left" { Resize "Increase Left"; }
+        bind "j" "Down" { Resize "Increase Down"; }
+        bind "k" "Up" { Resize "Increase Up"; }
+        bind "l" "Right" { Resize "Increase Right"; }
+        bind "H" { Resize "Decrease Left"; }
+        bind "J" { Resize "Decrease Down"; }
+        bind "K" { Resize "Decrease Up"; }
+        bind "L" { Resize "Decrease Right"; }
+        bind "=" "+" { Resize "Increase"; }
+        bind "-" { Resize "Decrease"; }
+        bind "Esc" { SwitchToMode "normal"; }
+    }
+
+    // Session mode
+    session {
+        bind "d" { Detach; }
+        bind "w" { SwitchToMode "normal"; }
+        bind "Esc" { SwitchToMode "normal"; }
+    }
+
+    // Rename tab mode
+    renametab {
+        bind "Esc" { SwitchToMode "normal"; }
+    }
+}
+
+// ==========================
+// Plugins
+// ==========================
+// Plugins are loaded from plugins/ directory
+// Default plugins are distributed with Zellij
+//
+// Security note (Hestia):
+// - Only load trusted WASM plugins
+// - Verify checksums before loading custom plugins
+// - See .gitignore for plugin security patterns
+
+// Status bar (default)
+// load_plugins {
+//     tab-bar { path "tab-bar"; }
+//     status-bar { path "status-bar"; }
+// }
+
+// ==========================
+// Advanced Settings
+// ==========================
+// Scrollback buffer
+// scrollback_editor "nvim"
+
+// Mirror session (multi-user)
+// mirror_session true
+
+// Layout directory
+// layout_dir "/path/to/layouts"
+
+// Theme directory
+// theme_dir "/path/to/themes"
+
+// ==========================
+// Performance
+// ==========================
+// Rendering optimization
+// simplified_ui false  // Full UI for better UX
+
+// ==========================
+// Compatibility
+// ==========================
+// Terminal compatibility
+// env {
+//     TERM "xterm-256color"
+// }
+
+// ============================================================================
+// Quick Reference
+// ============================================================================
+//
+// Primary Prefix: Ctrl+g
+//
+// Pane Management:
+//   Ctrl+g + c       : Create new pane
+//   Ctrl+g + x       : Close current pane
+//   Ctrl+g + z       : Toggle pane fullscreen
+//   Ctrl+g + |       : Split right
+//   Ctrl+g + -       : Split down
+//
+// Navigation:
+//   Ctrl+g + h/j/k/l : Navigate panes (Vim-style)
+//   Ctrl+g + arrows  : Navigate panes (Arrow keys)
+//
+// Modes:
+//   Ctrl+g + [       : Scroll mode (navigate history)
+//   Ctrl+g + r       : Resize mode
+//   Ctrl+g + w       : Session mode
+//
+// Tabs:
+//   Ctrl+g + t       : New tab
+//   Ctrl+g + ,       : Rename tab
+//   Ctrl+g + 1-9     : Switch to tab N
+//
+// Session:
+//   Ctrl+g + d       : Detach session
+//   Ctrl+g + ?       : Show help
+//
+// ============================================================================
+// Documentation
+// ============================================================================
+//
+// Official Docs: https://zellij.dev/documentation/
+// Keybindings: Ctrl+g + ? (inside Zellij)
+// Layouts: ~/.config/zellij/layouts/
+// Themes: ~/.config/zellij/themes/
+//
+// ============================================================================
