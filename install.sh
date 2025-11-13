@@ -23,6 +23,7 @@ source "${INSTALLERS_DIR}/fonts.sh"
 source "${INSTALLERS_DIR}/wezterm.sh"
 source "${INSTALLERS_DIR}/zellij.sh"
 source "${INSTALLERS_DIR}/neovim.sh"
+source "${INSTALLERS_DIR}/fish.sh"
 source "${INSTALLERS_DIR}/tools.sh"
 
 # Main installation flow
@@ -70,6 +71,9 @@ main() {
     install_neovim &
     local neovim_pid=$!
 
+    install_fish &
+    local fish_pid=$!
+
     install_tools &
     local tools_pid=$!
 
@@ -78,6 +82,7 @@ main() {
     wait $wezterm_pid && log_success "Wezterm installed" || log_warn "Wezterm installation had issues"
     wait $zellij_pid && log_success "Zellij installed" || log_warn "Zellij installation had issues"
     wait $neovim_pid && log_success "Neovim installed" || log_warn "Neovim installation had issues"
+    wait $fish_pid && log_success "Fish shell installed" || log_warn "Fish installation had issues"
     wait $tools_pid && log_success "Tools installed" || log_warn "Tools installation had issues"
     echo ""
 
@@ -86,6 +91,8 @@ main() {
     setup_symlinks
     setup_machine_specific_configs
     configure_zellij  # Initialize Zellij directories
+    configure_fish    # Setup Fish shell configurations
+    add_fish_to_shells
     echo ""
 
     # Phase 6: Verification
@@ -160,6 +167,7 @@ verify_installation() {
     verify_wezterm || ((errors++))
     verify_zellij || ((errors++))
     verify_neovim || ((errors++))
+    verify_fish || ((errors++))
     verify_fonts || ((errors++))
     verify_tools || ((errors++))
 
@@ -195,16 +203,20 @@ show_next_steps() {
     log_info "Next Steps:"
     echo ""
     echo "  1. Restart your terminal (or run: exec \$SHELL)"
-    echo "  2. Open Wezterm to see the new configuration"
-    echo "  3. Launch Zellij: zellij (or press Ctrl+a z in Wezterm)"
-    echo "  4. Open Neovim to trigger LazyVim bootstrap: nvim"
-    echo "  5. (Optional) Bootstrap LazyVim now: ${DOTFILES_DIR}/scripts/bootstrap-nvim.sh"
+    echo "  2. (Optional) Set Fish as default shell: chsh -s \$(which fish)"
+    echo "  3. Configure API keys in ~/.secure_credentials/api_keys.env (see example file)"
+    echo "  4. Open Wezterm to see the new configuration"
+    echo "  5. Launch Zellij: zellij (or press Ctrl+a z in Wezterm)"
+    echo "  6. Open Neovim to trigger LazyVim bootstrap: nvim"
+    echo "  7. (Optional) Bootstrap LazyVim now: ${DOTFILES_DIR}/scripts/bootstrap-nvim.sh"
     echo ""
     log_info "Configuration locations:"
     echo "  • Dotfiles: ${DOTFILES_DIR}"
     echo "  • Neovim: ~/.config/nvim -> ${DOTFILES_DIR}/config/nvim"
     echo "  • Wezterm: ~/.config/wezterm -> ${DOTFILES_DIR}/config/wezterm"
     echo "  • Zellij: ~/.config/zellij -> ${DOTFILES_DIR}/config/zellij"
+    echo "  • Fish: ~/.config/fish/config.fish -> ${DOTFILES_DIR}/config/fish/config.fish"
+    echo "  • Credentials: ~/.secure_credentials/ (chmod 700)"
     echo "  • Backup: ${BACKUP_DIR}/${BACKUP_TIMESTAMP}"
     echo ""
     log_info "Useful commands:"
