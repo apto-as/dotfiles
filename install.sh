@@ -92,6 +92,7 @@ main() {
     setup_machine_specific_configs
     configure_zellij  # Initialize Zellij directories
     configure_fish    # Setup Fish shell configurations
+    configure_tmux    # Setup tmux configurations and TPM
     add_fish_to_shells
     echo ""
 

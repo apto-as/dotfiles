@@ -157,6 +157,62 @@ EOF
     log_success "Fish shell configured"
 }
 
+# Configure tmux with dotfiles (TPM - Tmux Plugin Manager integration)
+configure_tmux() {
+    log_info "Configuring tmux integration..."
+
+    local tmux_config_dir="${DOTFILES_DIR}/config/tmux"
+
+    # Create tmux config directory if it doesn't exist
+    if [ ! -d "${tmux_config_dir}" ]; then
+        log_warn "tmux config directory not found in dotfiles"
+        return 1
+    fi
+
+    # Backup and symlink main tmux.conf
+    if [ -f "${HOME}/.tmux.conf" ] && [ ! -L "${HOME}/.tmux.conf" ]; then
+        log_warn "Backing up existing .tmux.conf"
+        mv "${HOME}/.tmux.conf" "${HOME}/.tmux.conf.backup-$(date +%Y%m%d-%H%M%S)"
+    fi
+
+    ln -sf "${tmux_config_dir}/tmux.conf" "${HOME}/.tmux.conf"
+    log_success "✓ Symlinked .tmux.conf"
+
+    # Symlink tmux.conf.osx
+    if [ -f "${tmux_config_dir}/tmux.conf.osx" ]; then
+        if [ -f "${HOME}/.tmux.conf.osx" ] && [ ! -L "${HOME}/.tmux.conf.osx" ]; then
+            log_warn "Backing up existing .tmux.conf.osx"
+            mv "${HOME}/.tmux.conf.osx" "${HOME}/.tmux.conf.osx.backup-$(date +%Y%m%d-%H%M%S)"
+        fi
+
+        ln -sf "${tmux_config_dir}/tmux.conf.osx" "${HOME}/.tmux.conf.osx"
+        log_success "✓ Symlinked .tmux.conf.osx"
+    fi
+
+    # Symlink tmux.conf.powerline
+    if [ -f "${tmux_config_dir}/tmux.conf.powerline" ]; then
+        if [ -f "${HOME}/.tmux.conf.powerline" ] && [ ! -L "${HOME}/.tmux.conf.powerline" ]; then
+            log_warn "Backing up existing .tmux.conf.powerline"
+            mv "${HOME}/.tmux.conf.powerline" "${HOME}/.tmux.conf.powerline.backup-$(date +%Y%m%d-%H%M%S)"
+        fi
+
+        ln -sf "${tmux_config_dir}/tmux.conf.powerline" "${HOME}/.tmux.conf.powerline"
+        log_success "✓ Symlinked .tmux.conf.powerline"
+    fi
+
+    # Check if TPM (Tmux Plugin Manager) is installed
+    if [ ! -d "${HOME}/.tmux/plugins/tpm" ]; then
+        log_info "Installing TPM (Tmux Plugin Manager)..."
+        git clone https://github.com/tmux-plugins/tpm "${HOME}/.tmux/plugins/tpm"
+        log_success "✓ TPM installed"
+        log_info "  Run 'Ctrl+b I' in tmux to install plugins"
+    else
+        log_success "✓ TPM already installed"
+    fi
+
+    log_success "tmux integration configured"
+}
+
 # Add Fish to valid shells (if not already)
 add_fish_to_shells() {
     local fish_path=$(which fish)
@@ -217,4 +273,4 @@ verify_fish() {
 }
 
 # Export functions
-export -f install_fish configure_fish add_fish_to_shells set_fish_as_default verify_fish
+export -f install_fish configure_fish configure_tmux add_fish_to_shells set_fish_as_default verify_fish

@@ -198,6 +198,43 @@ end
 # Optional: Enable semantic prompt for better navigation
 # printf "\033]133;A\007"  # Mark prompt start
 
+# ============================================================================
+# tmux Integration (TPM - Tmux Plugin Manager)
+# ============================================================================
+# Ensure TPM (Tmux Plugin Manager) binaries are accessible
+# TPM is installed at ~/.tmux/plugins/tpm
+# Configuration: ~/.tmux.conf, ~/.tmux.conf.osx, ~/.tmux.conf.powerline
+#
+# Usage:
+#   - Install plugins: Ctrl+b I (in tmux session)
+#   - Update plugins: Ctrl+b U
+#   - Remove plugins: Ctrl+b alt+u
+#
+# Note: tmux configuration is sourced by tmux itself, not by Fish shell.
+# This section only ensures TPM utilities are in PATH if needed.
+
+if test -d "$HOME/.tmux/plugins/tpm/bin"
+    # Add TPM binaries to PATH (for manual plugin management if needed)
+    fish_add_path "$HOME/.tmux/plugins/tpm/bin"
+end
+
+# Optional: Auto-attach to tmux session on terminal startup
+# Uncomment the following if you want automatic tmux session management
+#
+# if not set -q TMUX; and not set -q ZELLIJ
+#     # Not already in tmux or Zellij
+#     if command -v tmux &> /dev/null
+#         # Check if any tmux sessions exist
+#         if tmux has-session 2>/dev/null
+#             # Attach to existing session
+#             exec tmux attach-session
+#         else
+#             # Create new session
+#             exec tmux new-session
+#         end
+#     end
+# end
+
 oh-my-posh init fish --config /opt/homebrew/opt/oh-my-posh/themes/tsuyoshi.omp.json | source
 
 # >>> conda initialize >>>
