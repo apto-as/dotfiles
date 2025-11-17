@@ -1,0 +1,47 @@
+// ============================================================================
+// Default Layout - Simple Single Pane
+// Purpose: Clean, minimal workspace for general use
+// ============================================================================
+
+layout {
+    // Default tab with single pane
+    default_tab_template {
+        pane size=1 borderless=true {
+            plugin location="zellij:tab-bar"
+        }
+        children
+        pane size=2 borderless=true {
+            plugin location="zellij:status-bar"
+        }
+    }
+
+    // Single tab with one full-screen pane
+    tab name="main" {
+        pane
+    }
+}
+
+// ============================================================================
+// Usage
+// ============================================================================
+//
+// Load this layout:
+//   zellij --layout default
+//   zellij -l default
+//
+// This is the default layout loaded automatically if no layout is specified.
+//
+// Layout structure:
+//   ┌─────────────────────────────────────┐
+//   │ Tab Bar                             │
+//   ├─────────────────────────────────────┤
+//   │                                     │
+//   │                                     │
+//   │         Main Pane                   │
+//   │                                     │
+//   │                                     │
+//   ├─────────────────────────────────────┤
+//   │ Status Bar                          │
+//   └─────────────────────────────────────┘
+//
+// ============================================================================

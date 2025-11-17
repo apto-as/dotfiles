@@ -1,0 +1,116 @@
+// ============================================================================
+// Monitoring Layout - Four-Pane System Dashboard
+// Purpose: Real-time system monitoring and log observation
+// ============================================================================
+
+layout {
+    default_tab_template {
+        pane size=1 borderless=true {
+            plugin location="zellij:tab-bar"
+        }
+        children
+        pane size=2 borderless=true {
+            plugin location="zellij:status-bar"
+        }
+    }
+
+    // Monitoring tab with 2x2 grid layout
+    tab name="monitor" focus=true {
+        pane split_direction="vertical" {
+            // Left column (50%)
+            pane split_direction="horizontal" size="50%" {
+                // Top left: System resources (50% height)
+                pane size="50%" name="resources" focus=true {
+                    // Auto-launch htop (optional)
+                    // command "htop"
+                }
+
+                // Bottom left: Disk and memory (50% height)
+                pane size="50%" name="disk" {
+                    // Auto-launch disk monitor (optional)
+                    // command "watch" {
+                    //     args "-n" "2" "df -h"
+                    // }
+                }
+            }
+
+            // Right column (50%)
+            pane split_direction="horizontal" size="50%" {
+                // Top right: Network and processes (50% height)
+                pane size="50%" name="network" {
+                    // Auto-launch network monitor (optional)
+                    // command "watch" {
+                    //     args "-n" "2" "netstat -an"
+                    // }
+                }
+
+                // Bottom right: System logs (50% height)
+                pane size="50%" name="logs" {
+                    // Auto-launch log viewer (optional)
+                    // command "tail" {
+                    //     args "-f" "/var/log/system.log"
+                    // }
+                }
+            }
+        }
+    }
+}
+
+// ============================================================================
+// Usage
+// ============================================================================
+//
+// Load this layout:
+//   zellij --layout monitoring
+//   zellij -l monitoring
+//
+// Typical monitoring commands:
+//   Top left (resources):
+//     htop                      # Interactive process viewer
+//     top                       # Classic system monitor
+//     btop                      # Modern resource monitor
+//
+//   Bottom left (disk):
+//     watch -n 2 "df -h"        # Disk usage
+//     watch -n 2 "free -h"      # Memory usage
+//     iostat 2                  # I/O statistics
+//
+//   Top right (network):
+//     watch -n 2 "netstat -an"  # Network connections
+//     iftop                     # Network bandwidth
+//     nethogs                   # Network per-process
+//
+//   Bottom right (logs):
+//     tail -f /var/log/system.log         # macOS system log
+//     journalctl -f                       # Linux systemd logs
+//     tail -f /usr/local/var/log/nginx/*  # Web server logs
+//     docker logs -f <container>          # Docker logs
+//
+// Navigation:
+//   Ctrl+g + h/j/k/l : Navigate between panes
+//   Ctrl+g + z       : Toggle pane fullscreen
+//   Ctrl+g + [       : Scroll mode (for log history)
+//
+// Layout structure:
+//   ┌─────────────────────────────────────┐
+//   │ Tab Bar                             │
+//   ├──────────────────┬──────────────────┤
+//   │                  │                  │
+//   │   Resources      │    Network       │
+//   │   (htop/top)     │   (netstat)      │
+//   ├──────────────────┼──────────────────┤
+//   │                  │                  │
+//   │   Disk/Memory    │     Logs         │
+//   │   (df/free)      │   (tail -f)      │
+//   ├──────────────────┴──────────────────┤
+//   │ Status Bar                          │
+//   └─────────────────────────────────────┘
+//
+// Customization:
+//   To auto-launch monitoring tools, uncomment "command" lines:
+//     Top left:     htop
+//     Bottom left:  watch -n 2 "df -h"
+//     Top right:    watch -n 2 "netstat -an"
+//     Bottom right: tail -f /var/log/system.log (adjust path for your OS)
+//
+// ============================================================================

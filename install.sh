@@ -21,7 +21,9 @@ source "${LIB_DIR}/symlink.sh"
 source "${INSTALLERS_DIR}/homebrew.sh"
 source "${INSTALLERS_DIR}/fonts.sh"
 source "${INSTALLERS_DIR}/wezterm.sh"
+source "${INSTALLERS_DIR}/zellij.sh"
 source "${INSTALLERS_DIR}/neovim.sh"
+source "${INSTALLERS_DIR}/fish.sh"
 source "${INSTALLERS_DIR}/tools.sh"
 
 # Main installation flow
@@ -63,8 +65,14 @@ main() {
     install_wezterm &
     local wezterm_pid=$!
 
+    install_zellij &
+    local zellij_pid=$!
+
     install_neovim &
     local neovim_pid=$!
+
+    install_fish &
+    local fish_pid=$!
 
     install_tools &
     local tools_pid=$!
@@ -72,7 +80,9 @@ main() {
     # Wait for all parallel installations
     wait $fonts_pid && log_success "Fonts installed" || log_warn "Fonts installation had issues"
     wait $wezterm_pid && log_success "Wezterm installed" || log_warn "Wezterm installation had issues"
+    wait $zellij_pid && log_success "Zellij installed" || log_warn "Zellij installation had issues"
     wait $neovim_pid && log_success "Neovim installed" || log_warn "Neovim installation had issues"
+    wait $fish_pid && log_success "Fish shell installed" || log_warn "Fish installation had issues"
     wait $tools_pid && log_success "Tools installed" || log_warn "Tools installation had issues"
     echo ""
 
@@ -80,6 +90,10 @@ main() {
     log_info "[Phase 5/6] Setup Configurations"
     setup_symlinks
     setup_machine_specific_configs
+    configure_zellij  # Initialize Zellij directories
+    configure_fish    # Setup Fish shell configurations
+    configure_tmux    # Setup tmux configurations and TPM
+    add_fish_to_shells
     echo ""
 
     # Phase 6: Verification
@@ -105,6 +119,7 @@ backup_existing_configs() {
     local -a configs=(
         "${HOME}/.config/nvim"
         "${HOME}/.config/wezterm"
+        "${HOME}/.config/zellij"
     )
 
     backup_batch "${configs[@]}"
@@ -115,6 +130,7 @@ setup_symlinks() {
     local -a symlink_mappings=(
         "${DOTFILES_DIR}/config/nvim:${HOME}/.config/nvim"
         "${DOTFILES_DIR}/config/wezterm:${HOME}/.config/wezterm"
+        "${DOTFILES_DIR}/config/zellij:${HOME}/.config/zellij"
     )
 
     create_symlinks "${symlink_mappings[@]}"
@@ -150,7 +166,9 @@ verify_installation() {
 
     # Verify commands
     verify_wezterm || ((errors++))
+    verify_zellij || ((errors++))
     verify_neovim || ((errors++))
+    verify_fish || ((errors++))
     verify_fonts || ((errors++))
     verify_tools || ((errors++))
 
@@ -158,9 +176,16 @@ verify_installation() {
     local -a symlink_mappings=(
         "${DOTFILES_DIR}/config/nvim:${HOME}/.config/nvim"
         "${DOTFILES_DIR}/config/wezterm:${HOME}/.config/wezterm"
+        "${DOTFILES_DIR}/config/zellij:${HOME}/.config/zellij"
     )
 
     verify_symlinks "${symlink_mappings[@]}" || ((errors++))
+
+    # Verify Zellij security
+    verify_zellij_security || {
+        log_error "Zellij security verification failed"
+        ((errors++))
+    }
 
     if [[ ${errors} -gt 0 ]]; then
         log_warn "Installation completed with ${errors} issue(s)"
@@ -179,20 +204,28 @@ show_next_steps() {
     log_info "Next Steps:"
     echo ""
     echo "  1. Restart your terminal (or run: exec \$SHELL)"
-    echo "  2. Open Wezterm to see the new configuration"
-    echo "  3. Open Neovim to trigger LazyVim bootstrap: nvim"
-    echo "  4. (Optional) Bootstrap LazyVim now: ${DOTFILES_DIR}/scripts/bootstrap-nvim.sh"
+    echo "  2. (Optional) Set Fish as default shell: chsh -s \$(which fish)"
+    echo "  3. Configure API keys in ~/.secure_credentials/api_keys.env (see example file)"
+    echo "  4. Open Wezterm to see the new configuration"
+    echo "  5. Launch Zellij: zellij (or press Ctrl+a z in Wezterm)"
+    echo "  6. Open Neovim to trigger LazyVim bootstrap: nvim"
+    echo "  7. (Optional) Bootstrap LazyVim now: ${DOTFILES_DIR}/scripts/bootstrap-nvim.sh"
     echo ""
     log_info "Configuration locations:"
     echo "  • Dotfiles: ${DOTFILES_DIR}"
     echo "  • Neovim: ~/.config/nvim -> ${DOTFILES_DIR}/config/nvim"
     echo "  • Wezterm: ~/.config/wezterm -> ${DOTFILES_DIR}/config/wezterm"
+    echo "  • Zellij: ~/.config/zellij -> ${DOTFILES_DIR}/config/zellij"
+    echo "  • Fish: ~/.config/fish/config.fish -> ${DOTFILES_DIR}/config/fish/config.fish"
+    echo "  • Credentials: ~/.secure_credentials/ (chmod 700)"
     echo "  • Backup: ${BACKUP_DIR}/${BACKUP_TIMESTAMP}"
     echo ""
     log_info "Useful commands:"
     echo "  • Update dotfiles: ${DOTFILES_DIR}/update.sh"
     echo "  • List backups: ${DOTFILES_DIR}/install.sh --list-backups"
     echo "  • Rollback: ${DOTFILES_DIR}/install.sh --rollback"
+    echo "  • Launch Zellij: zellij"
+    echo "  • Zellij keybindings: Ctrl+g ? (inside Zellij)"
     echo ""
 }
 

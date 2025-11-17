@@ -57,6 +57,13 @@ known_hosts
 **/github*token*
 **/openai*key*
 **/claude*key*
+**/*gemini*key*
+
+# Secure credentials directory (Hestia Security Audit 2025-11-13)
+# NOTE: This ignores ~/.secure_credentials/ (user's home directory)
+#       but NOT config/fish/conf.d/secure_credentials.fish (version-controlled config)
+**/.secure_credentials/
+!**/.secure_credentials/*.example
 
 # ==========================
 # Cloud Provider Credentials
@@ -66,6 +73,11 @@ known_hosts
 **/.azure/**
 **/google-credentials.json
 **/aws-credentials.ini
+
+# Google Service Account Keys (Hestia Security Audit 2025-11-13)
+**/.gemini/**/*.json
+!**/.gemini/**/README.md
+**/.gemini/oauth_creds.json
 
 # ==========================
 # Databases
@@ -181,6 +193,27 @@ vendor/bundle
 **/assets/wallpapers/machines/*/personal-*
 
 # ==========================
+# Zellij (Terminal Multiplexer)
+# ==========================
+# Session data (contains command history, may include credentials)
+**/.cache/zellij/
+**/zellij/sessions/
+
+# Personal layouts with sensitive paths or project information
+**/zellij/layouts/*-personal.kdl
+**/zellij/layouts/*-work.kdl
+**/zellij/layouts/*-client-*.kdl
+
+# Downloaded plugins (verify integrity before committing)
+**/zellij/plugins/*.wasm
+!**/zellij/plugins/zellij-*.wasm  # Official Zellij plugins OK
+
+# Local configuration overrides
+**/zellij/config.local.kdl
+**/zellij/.local.kdl
+**/zellij/config-*.local.kdl
+
+# ==========================
 # Git LFS
 # ==========================
 # Large binary files
@@ -221,3 +254,4 @@ coverage/
 # 5. Set up pre-commit hooks to prevent secrets from being committed
 #
 # ============================================================================
+*.backup-*

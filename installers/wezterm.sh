@@ -15,6 +15,15 @@ install_wezterm() {
     case "${DETECTED_OS}" in
         macos)
             brew install --cask wezterm
+
+            # Remove Gatekeeper quarantine attribute (Security: Hestia 2025-11-17)
+            # Prevents PATH restriction when launching from Finder/Dock
+            # See: SECURITY_AUDIT_REPORT_PATH_RESTRICTION.md
+            if [ -d "/Applications/WezTerm.app" ]; then
+                log_info "Removing Gatekeeper quarantine attribute..."
+                xattr -d com.apple.quarantine /Applications/WezTerm.app 2>/dev/null || true
+                log_success "✓ WezTerm quarantine attribute removed"
+            fi
             ;;
         linux)
             log_warn "Wezterm installation on Linux requires manual setup"

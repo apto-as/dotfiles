@@ -47,12 +47,12 @@ config.color_scheme = "Dracula"
 
 config.font = wezterm.font_with_fallback({
   {
-    family = "PlemolJP Console NF",
+    family = "Hack Nerd Font",  -- Powerline/NerdFont完全サポート（既にインストール済み）
     weight = "Regular",
     harfbuzz_features = { "calt=1", "clig=1", "liga=1" },  -- リガチャ有効化
   },
-  "JetBrains Mono",      -- フォールバック1
-  "Noto Sans CJK JP",    -- 日本語フォールバック
+  "PlemolJP Console NF",  -- 日本語フォールバック
+  "Noto Sans CJK JP",     -- 最終フォールバック
 })
 
 config.font_size = 14.0
@@ -222,6 +222,67 @@ wezterm.on('format-tab-title', function(tab, tabs, panes, config, hover, max_wid
     { Text = SOLID_RIGHT_ARROW },  -- 右三角形
   }
 end)
+
+-- ============================================================================
+-- Zellij Integration (Terminal Multiplexer)
+-- ============================================================================
+-- Auto-start Zellij on Wezterm launch
+-- Control via environment variable: WEZTERM_ZELLIJ_AUTO_START (default: true)
+--
+-- To disable: export WEZTERM_ZELLIJ_AUTO_START=false
+-- To re-enable: unset WEZTERM_ZELLIJ_AUTO_START
+--
+-- Keybindings:
+--   Ctrl+a z  : Toggle Zellij (attach/detach)
+--   Ctrl+g    : Zellij prefix (inside Zellij)
+-- ============================================================================
+
+-- Check if Zellij auto-start is enabled (default: false - 2025-11-17 user request)
+local zellij_auto_start = os.getenv('WEZTERM_ZELLIJ_AUTO_START')
+if zellij_auto_start == nil then
+  zellij_auto_start = 'false'  -- Default: disabled (Starship testing)
+end
+
+-- Only auto-start if:
+-- 1. Auto-start is enabled
+-- 2. Not already inside a Zellij session (prevent nested sessions)
+if zellij_auto_start:lower() ~= 'false' and os.getenv('ZELLIJ') == nil then
+  -- Default program: Launch Zellij via Fish shell
+  --
+  -- CRITICAL FIX (Hera Strategic Analysis 2025-11-17):
+  -- Problem: Direct Zellij launch fails with "EOPNOTSUPP: could not get terminal attribute"
+  -- Root Cause: Zellij requires fully initialized TTY before startup
+  -- Solution: Launch Fish login shell (-l) first, which:
+  --   1. Initializes TTY environment completely
+  --   2. Sources Homebrew PATH from config-osx.fish
+  --   3. Then executes Zellij in proper terminal context
+  --
+  -- Execution flow: Wezterm → Fish (-l) → Zellij (in initialized TTY)
+  config.default_prog = { '/opt/homebrew/bin/fish', '-l', '-c', 'zellij attach --create' }
+
+  wezterm.log_info('Zellij auto-start enabled (via Fish shell for TTY initialization). Use WEZTERM_ZELLIJ_AUTO_START=false to disable.')
+else
+  if os.getenv('ZELLIJ') then
+    wezterm.log_info('Already inside Zellij session. Skipping auto-start.')
+  else
+    wezterm.log_info('Zellij auto-start disabled via WEZTERM_ZELLIJ_AUTO_START.')
+  end
+end
+
+-- ============================================================================
+-- Keybindings for Zellij Integration
+-- ============================================================================
+config.keys = {
+  -- Ctrl+a z: Quick Zellij attach/launch
+  {
+    key = 'z',
+    mods = 'CTRL',
+    action = wezterm.action.SpawnCommandInNewTab {
+      -- CRITICAL FIX (Artemis 2025-11-17): Use absolute path for keybinding
+      args = { '/opt/homebrew/bin/zellij', 'attach', '--create' },
+    },
+  },
+}
 
 -- ============================================================================
 -- Machine-Specific Configuration Loading
