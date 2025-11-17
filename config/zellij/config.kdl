@@ -210,10 +210,10 @@ keybinds {
 // - See .gitignore for plugin security patterns
 
 // Status bar (default)
-// load_plugins {
-//     tab-bar { path "tab-bar"; }
-//     status-bar { path "status-bar"; }
-// }
+load_plugins {
+    tab-bar { path "tab-bar"; }
+    status-bar { path "status-bar"; }
+}
 
 // ==========================
 // Advanced Settings
@@ -234,7 +234,7 @@ keybinds {
 // Performance
 // ==========================
 // Rendering optimization
-// simplified_ui false  // Full UI for better UX
+// (UI settings configured above in "UI Configuration" section)
 
 // ==========================
 // Compatibility
