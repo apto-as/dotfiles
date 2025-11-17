@@ -254,3 +254,4 @@ coverage/
 # 5. Set up pre-commit hooks to prevent secrets from being committed
 #
 # ============================================================================
+*.backup-*

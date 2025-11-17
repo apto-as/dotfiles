@@ -1,95 +1,120 @@
-// ============================================================================
-// Dracula Theme for Zellij
-// Official Dracula Color Palette
-// Consistent with Wezterm & Neovim configurations
-// ============================================================================
-//
-// Dracula Official Colors:
-// - Background:    #282a36
-// - Current Line:  #44475a
-// - Foreground:    #f8f8f2
-// - Comment:       #6272a4
-// - Cyan:          #8be9fd
-// - Green:         #50fa7b
-// - Orange:        #ffb86c
-// - Pink:          #ff79c6
-// - Purple:        #bd93f9
-// - Red:           #ff5555
-// - Yellow:        #f1fa8c
-//
-// Reference: https://draculatheme.com/contribute
-// ============================================================================
-
 themes {
     dracula {
-        // ==========================
-        // Base Colors
-        // ==========================
-        fg "#f8f8f2"        // Foreground: Dracula white
-        bg "#282a36"        // Background: Dracula dark background
-
-        // ==========================
-        // ANSI Colors (Normal)
-        // ==========================
-        black "#282a36"     // Black: Same as background
-        red "#ff5555"       // Red: Dracula red
-        green "#50fa7b"     // Green: Dracula green
-        yellow "#f1fa8c"    // Yellow: Dracula yellow
-        blue "#bd93f9"      // Blue: Dracula purple (ANSI blue → purple)
-        magenta "#ff79c6"   // Magenta: Dracula pink
-        cyan "#8be9fd"      // Cyan: Dracula cyan
-        white "#f8f8f2"     // White: Dracula foreground
-
-        // ==========================
-        // ANSI Colors (Bright)
-        // ==========================
-        bright_black "#6272a4"      // Bright Black: Dracula comment (darker gray)
-        bright_red "#ff6e6e"        // Bright Red: Lighter red
-        bright_green "#69ff94"      // Bright Green: Lighter green
-        bright_yellow "#ffffa5"     // Bright Yellow: Lighter yellow
-        bright_blue "#d6acff"       // Bright Blue: Lighter purple
-        bright_magenta "#ff92df"    // Bright Magenta: Lighter pink
-        bright_cyan "#a4ffff"       // Bright Cyan: Lighter cyan
-        bright_white "#ffffff"      // Bright White: Pure white
-
-        // ==========================
-        // Dracula Special Colors
-        // ==========================
-        orange "#ffb86c"    // Orange: Dracula orange (for special highlights)
+        text_unselected {
+            base 255 255 255
+            background 0 0 0
+            emphasis_0 255 184 108
+            emphasis_1 139 233 253
+            emphasis_2 80 250 123
+            emphasis_3 255 121 198
+        }
+        text_selected {
+            base 255 255 255
+            background 40 42 54
+            emphasis_0 255 184 108
+            emphasis_1 139 233 253
+            emphasis_2 80 250 123
+            emphasis_3 255 121 198
+        }
+        ribbon_selected {
+            base 0 0 0
+            background 80 250 123
+            emphasis_0 255 85 85
+            emphasis_1 255 184 108
+            emphasis_2 255 121 198
+            emphasis_3 98 114 164
+        }
+        ribbon_unselected {
+            base 0 0 0
+            background 248 248 242
+            emphasis_0 255 85 85
+            emphasis_1 255 255 255
+            emphasis_2 98 114 164
+            emphasis_3 255 121 198
+        }
+        table_title {
+            base 80 250 123
+            background 0
+            emphasis_0 255 184 108
+            emphasis_1 139 233 253
+            emphasis_2 80 250 123
+            emphasis_3 255 121 198
+        }
+        table_cell_selected {
+            base 255 255 255
+            background 40 42 54
+            emphasis_0 255 184 108
+            emphasis_1 139 233 253
+            emphasis_2 80 250 123
+            emphasis_3 255 121 198
+        }
+        table_cell_unselected {
+            base 255 255 255
+            background 0 0 0
+            emphasis_0 255 184 108
+            emphasis_1 139 233 253
+            emphasis_2 80 250 123
+            emphasis_3 255 121 198
+        }
+        list_selected {
+            base 255 255 255
+            background 40 42 54
+            emphasis_0 255 184 108
+            emphasis_1 139 233 253
+            emphasis_2 80 250 123
+            emphasis_3 255 121 198
+        }
+        list_unselected {
+            base 255 255 255
+            background 0 0 0
+            emphasis_0 255 184 108
+            emphasis_1 139 233 253
+            emphasis_2 80 250 123
+            emphasis_3 255 121 198
+        }
+        frame_selected {
+            base 80 250 123
+            background 0
+            emphasis_0 255 184 108
+            emphasis_1 139 233 253
+            emphasis_2 255 121 198
+            emphasis_3 0
+        }
+        frame_highlight {
+            base 255 184 108
+            background 0
+            emphasis_0 255 121 198
+            emphasis_1 255 184 108
+            emphasis_2 255 184 108
+            emphasis_3 255 184 108
+        }
+        exit_code_success {
+            base 80 250 123
+            background 0
+            emphasis_0 139 233 253
+            emphasis_1 0 0 0
+            emphasis_2 255 121 198
+            emphasis_3 98 114 164
+        }
+        exit_code_error {
+            base 255 85 85
+            background 0
+            emphasis_0 241 250 140
+            emphasis_1 0
+            emphasis_2 0
+            emphasis_3 0
+        }
+        multiplayer_user_colors {
+            player_1 255 121 198
+            player_2 98 114 164
+            player_3 0
+            player_4 241 250 140
+            player_5 139 233 253
+            player_6 0
+            player_7 255 85 85
+            player_8 0
+            player_9 0
+            player_10 0
+        }
     }
 }
-
-// ============================================================================
-// Usage
-// ============================================================================
-//
-// This theme is automatically loaded by config.kdl:
-//   theme "dracula"
-//
-// Color Application in Zellij:
-// - fg/bg: Main text and background
-// - black/bright_black: Borders and subtle elements
-// - red/bright_red: Errors and warnings
-// - green/bright_green: Success messages
-// - yellow/bright_yellow: Info and highlights
-// - blue/bright_blue: Active pane indicators
-// - magenta/bright_magenta: Mode indicators
-// - cyan/bright_cyan: Tab titles and accents
-// - white/bright_white: Prominent text
-// - orange: Special highlights and notifications
-//
-// ============================================================================
-// Consistency Notes
-// ============================================================================
-//
-// This theme matches:
-// - Wezterm: config.color_scheme = "Dracula" (builtin)
-// - Neovim: LazyVim with Dracula theme
-//
-// Visual Hierarchy:
-// 1. Active elements: Purple (#bd93f9), Pink (#ff79c6)
-// 2. Important text: Foreground (#f8f8f2), White (#ffffff)
-// 3. Subtle elements: Comment (#6272a4), Current Line (#44475a)
-// 4. Semantic colors: Red (errors), Green (success), Yellow (warnings)
-//
-// ============================================================================

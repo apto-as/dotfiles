@@ -19,9 +19,10 @@ theme "dracula"
 // ==========================
 // Default Behavior
 // ==========================
-// Default shell (explicitly set to Fish)
+// Default shell (explicitly set to Fish with login flag)
 // System default: /opt/homebrew/bin/fish
-default_shell "fish"
+// CRITICAL: Use array format with "-l" flag to ensure config.fish is loaded
+default_shell "/opt/homebrew/bin/fish" "-l"
 
 // Default layout to load on startup
 default_layout "default"
@@ -49,8 +50,9 @@ pane_frames true
 
 // Simplified UI (minimal status bar)
 // true = Hide status bar and tab bar until a key is pressed (full-screen mode)
-// false = Always show status bar and tab bar
-simplified_ui true
+// false = Always show status bar and tab bar (公式Dracula Zellijスタイル)
+// ✅ false推奨: タブバー・ステータスバーにNerd Fontアイコンとキーバインドヒントを常時表示
+simplified_ui false
 
 // Default editor for `zellij edit`
 // Uses $EDITOR environment variable by default

@@ -47,12 +47,12 @@ config.color_scheme = "Dracula"
 
 config.font = wezterm.font_with_fallback({
   {
-    family = "PlemolJP Console NF",
+    family = "Hack Nerd Font",  -- Powerline/NerdFont完全サポート（既にインストール済み）
     weight = "Regular",
     harfbuzz_features = { "calt=1", "clig=1", "liga=1" },  -- リガチャ有効化
   },
-  "JetBrains Mono",      -- フォールバック1
-  "Noto Sans CJK JP",    -- 日本語フォールバック
+  "PlemolJP Console NF",  -- 日本語フォールバック
+  "Noto Sans CJK JP",     -- 最終フォールバック
 })
 
 config.font_size = 14.0
@@ -237,10 +237,10 @@ end)
 --   Ctrl+g    : Zellij prefix (inside Zellij)
 -- ============================================================================
 
--- Check if Zellij auto-start is enabled (default: true)
+-- Check if Zellij auto-start is enabled (default: false - 2025-11-17 user request)
 local zellij_auto_start = os.getenv('WEZTERM_ZELLIJ_AUTO_START')
 if zellij_auto_start == nil then
-  zellij_auto_start = 'true'  -- Default: enabled
+  zellij_auto_start = 'false'  -- Default: disabled (Starship testing)
 end
 
 -- Only auto-start if:

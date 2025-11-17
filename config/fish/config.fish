@@ -236,21 +236,21 @@ end
 # end
 
 # ============================================================================
-# Prompt Configuration - Starship (default) with oh-my-posh fallback
+# Prompt Configuration - oh-my-posh (default) with Starship fallback
 # ============================================================================
-# Toggle between Starship and oh-my-posh:
-#   export USE_OMP=1       # Use oh-my-posh
-#   unset USE_OMP          # Use Starship (default)
+# Toggle between oh-my-posh and Starship:
+#   export USE_STARSHIP=1  # Use Starship (experimental)
+#   unset USE_STARSHIP     # Use oh-my-posh (default)
 # ============================================================================
 
-if set -q USE_OMP
-    # Fallback: oh-my-posh (Go-based, ~18.5ms render time)
-    oh-my-posh init fish --config /opt/homebrew/opt/oh-my-posh/themes/tsuyoshi.omp.json | source
-else
-    # Default: Starship (Rust-based, ~8.1ms render time, 2.3× faster)
+if set -q USE_STARSHIP
+    # Experimental: Starship (Rust-based, ~8.1ms render time)
     # Dracula theme with visual parity to oh-my-posh tsuyoshi design
     set -x STARSHIP_CONFIG ~/.config/starship/dracula.toml
     starship init fish | source
+else
+    # Default: oh-my-posh (Go-based, proven design)
+    oh-my-posh init fish --config /opt/homebrew/opt/oh-my-posh/themes/tsuyoshi.omp.json | source
 end
 
 # >>> conda initialize >>>
