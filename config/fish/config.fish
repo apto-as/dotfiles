@@ -106,6 +106,37 @@ function fzf
 end
 
 # ============================================================================
+# OS-Specific Configuration (Legacy Support)
+# ============================================================================
+# Load OS-specific config files for backward compatibility with existing setup
+# IMPORTANT: This must be loaded BEFORE dotfiles machine-specific config
+#            to allow machine configs to override OS-level settings
+
+switch (uname)
+    case Darwin
+        # macOS-specific configuration (Homebrew environment variables, etc.)
+        set os_config (dirname (status --current-filename))/config-osx.fish
+        if test -f $os_config
+            source $os_config
+        else if test -f ~/.config/fish/config-osx.fish
+            # Fallback to ~/.config/fish/ location
+            source ~/.config/fish/config-osx.fish
+        end
+    case Linux
+        # Linux-specific configuration (if needed)
+        set os_config (dirname (status --current-filename))/config-linux.fish
+        if test -f $os_config
+            source $os_config
+        end
+    case '*'
+        # Windows or other OS
+        set os_config (dirname (status --current-filename))/config-windows.fish
+        if test -f $os_config
+            source $os_config
+        end
+end
+
+# ============================================================================
 # Machine-Specific Configuration (Dotfiles Integration)
 # ============================================================================
 # Load machine-specific Fish config from dotfiles/machines/{MACHINE_TYPE}/
@@ -123,6 +154,9 @@ if not set -q MACHINE_TYPE
     # Auto-detect from hostname
     set detected_hostname (hostname -s)
     switch $detected_hostname
+        case 'Mac' '*9dw-main01*' '*macbookpro*' '*MacBookPro*' '*m3max*'
+            # Specific hostname "Mac" or full "9dw-main01-m3max-macbookpro" → macbook
+            set -gx MACHINE_TYPE "macbook"
         case '*macbook*' '*MacBook*'
             set -gx MACHINE_TYPE "macbook"
         case '*macmini*' '*MacMini*'

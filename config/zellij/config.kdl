@@ -19,8 +19,9 @@ theme "dracula"
 // ==========================
 // Default Behavior
 // ==========================
-// Default shell (respects $SHELL environment variable)
-// default_shell "zsh"
+// Default shell (explicitly set to Fish)
+// System default: /opt/homebrew/bin/fish
+default_shell "fish"
 
 // Default layout to load on startup
 default_layout "default"

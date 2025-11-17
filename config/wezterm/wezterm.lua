@@ -247,11 +247,20 @@ end
 -- 1. Auto-start is enabled
 -- 2. Not already inside a Zellij session (prevent nested sessions)
 if zellij_auto_start:lower() ~= 'false' and os.getenv('ZELLIJ') == nil then
-  -- Default program: Launch Zellij or attach to existing session
-  -- Zellij will auto-attach if session exists, or create new one
-  config.default_prog = { 'zellij', 'attach', '--create' }
+  -- Default program: Launch Zellij via Fish shell
+  --
+  -- CRITICAL FIX (Hera Strategic Analysis 2025-11-17):
+  -- Problem: Direct Zellij launch fails with "EOPNOTSUPP: could not get terminal attribute"
+  -- Root Cause: Zellij requires fully initialized TTY before startup
+  -- Solution: Launch Fish login shell (-l) first, which:
+  --   1. Initializes TTY environment completely
+  --   2. Sources Homebrew PATH from config-osx.fish
+  --   3. Then executes Zellij in proper terminal context
+  --
+  -- Execution flow: Wezterm → Fish (-l) → Zellij (in initialized TTY)
+  config.default_prog = { '/opt/homebrew/bin/fish', '-l', '-c', 'zellij attach --create' }
 
-  wezterm.log_info('Zellij auto-start enabled. Use WEZTERM_ZELLIJ_AUTO_START=false to disable.')
+  wezterm.log_info('Zellij auto-start enabled (via Fish shell for TTY initialization). Use WEZTERM_ZELLIJ_AUTO_START=false to disable.')
 else
   if os.getenv('ZELLIJ') then
     wezterm.log_info('Already inside Zellij session. Skipping auto-start.')
@@ -269,7 +278,8 @@ config.keys = {
     key = 'z',
     mods = 'CTRL',
     action = wezterm.action.SpawnCommandInNewTab {
-      args = { 'zellij', 'attach', '--create' },
+      -- CRITICAL FIX (Artemis 2025-11-17): Use absolute path for keybinding
+      args = { '/opt/homebrew/bin/zellij', 'attach', '--create' },
     },
   },
 }

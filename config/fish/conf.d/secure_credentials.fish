@@ -64,8 +64,8 @@ else if test -f "$HOME/.secure_credentials/api_keys.env"
     # Auto-load credentials from file on shell startup
     load_credentials_from_file
 
-    echo "⚠️  1Password CLI not found. Using fallback secure file." >&2
-    echo "   Install 1Password CLI for better security: brew install 1password-cli" >&2
+    # Note: Using secure file-based credentials (1Password CLI is optional)
+    # To enable 1Password CLI integration: brew install 1password-cli
 else
     echo "⚠️  No secure credential storage found." >&2
     echo "   Option 1: Install 1Password CLI: brew install 1password-cli" >&2

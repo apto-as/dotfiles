@@ -7,19 +7,19 @@
 set -euo pipefail
 
 # Performance optimized logging
-readonly LOG_FILE="${HOME}/.dotfiles-install.log"
-readonly TIMESTAMP_FORMAT="+%Y-%m-%d %H:%M:%S"
+LOG_FILE="${HOME}/.dotfiles-install.log"
+TIMESTAMP_FORMAT="+%Y-%m-%d %H:%M:%S"
 
 # Color codes (with terminal detection)
 if [[ -t 1 ]]; then
-    readonly RED='\033[0;31m'
-    readonly GREEN='\033[0;32m'
-    readonly YELLOW='\033[1;33m'
-    readonly BLUE='\033[0;34m'
-    readonly CYAN='\033[0;36m'
-    readonly NC='\033[0m'
+    RED='\033[0;31m'
+    GREEN='\033[0;32m'
+    YELLOW='\033[1;33m'
+    BLUE='\033[0;34m'
+    CYAN='\033[0;36m'
+    NC='\033[0m'
 else
-    readonly RED='' GREEN='' YELLOW='' BLUE='' CYAN='' NC=''
+    RED='' GREEN='' YELLOW='' BLUE='' CYAN='' NC=''
 fi
 
 # Logging functions

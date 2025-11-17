@@ -60,8 +60,10 @@ known_hosts
 **/*gemini*key*
 
 # Secure credentials directory (Hestia Security Audit 2025-11-13)
-.secure_credentials/
-!.secure_credentials/*.example
+# NOTE: This ignores ~/.secure_credentials/ (user's home directory)
+#       but NOT config/fish/conf.d/secure_credentials.fish (version-controlled config)
+**/.secure_credentials/
+!**/.secure_credentials/*.example
 
 # ==========================
 # Cloud Provider Credentials

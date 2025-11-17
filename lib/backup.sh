@@ -7,9 +7,9 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/core.sh"
 
-readonly BACKUP_DIR="${HOME}/.dotfiles-backup"
-readonly BACKUP_TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-readonly BACKUP_MANIFEST="${BACKUP_DIR}/.manifest"
+BACKUP_DIR="${HOME}/.dotfiles-backup"
+BACKUP_TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+BACKUP_MANIFEST="${BACKUP_DIR}/.manifest"
 
 # Create backup directory structure
 init_backup() {
