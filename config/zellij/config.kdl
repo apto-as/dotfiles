@@ -48,7 +48,9 @@ default_mode "normal"
 pane_frames true
 
 // Simplified UI (minimal status bar)
-simplified_ui false
+// true = Hide status bar and tab bar until a key is pressed (full-screen mode)
+// false = Always show status bar and tab bar
+simplified_ui true
 
 // Default editor for `zellij edit`
 // Uses $EDITOR environment variable by default
