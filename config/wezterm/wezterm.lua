@@ -47,12 +47,11 @@ config.color_scheme = "Dracula"
 
 config.font = wezterm.font_with_fallback({
   {
-    family = "Hack Nerd Font",  -- Powerline/NerdFont完全サポート（既にインストール済み）
+    family = "PlemolJP Console NF",  -- プライマリ: 日本語+NerdFont完全サポート
     weight = "Regular",
     harfbuzz_features = { "calt=1", "clig=1", "liga=1" },  -- リガチャ有効化
   },
-  "PlemolJP Console NF",  -- 日本語フォールバック
-  "Noto Sans CJK JP",     -- 最終フォールバック
+  "Noto Sans CJK JP",  -- 最終フォールバック
 })
 
 config.font_size = 14.0
