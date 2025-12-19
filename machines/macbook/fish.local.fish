@@ -44,6 +44,35 @@ if type -q exa
 end
 
 # ============================================================================
+# Conda/Miniforge Configuration (Machine-Specific)
+# ============================================================================
+# This machine uses Miniforge (conda) installed at ~/miniforge3
+# Lazy initialization for faster shell startup (~50-100ms saved)
+
+set -l CONDA_BASE "$HOME/miniforge3"
+
+if test -d $CONDA_BASE
+    set -gx CONDA_EXE "$CONDA_BASE/bin/conda"
+    set -gx _CONDA_ROOT $CONDA_BASE
+
+    # Lazy-load conda on first use
+    function conda --description "Lazy-loaded conda with auto-initialization"
+        functions -e conda  # Remove this wrapper
+
+        if test -f $CONDA_EXE
+            eval $CONDA_EXE "shell.fish" hook $argv | source
+        else if test -f "$_CONDA_ROOT/etc/fish/conf.d/conda.fish"
+            source "$_CONDA_ROOT/etc/fish/conf.d/conda.fish"
+        else
+            fish_add_path -p "$_CONDA_ROOT/bin"
+        end
+
+        # Run the actual conda command
+        conda $argv
+    end
+end
+
+# ============================================================================
 # Personal Functions
 # ============================================================================
 

@@ -1,0 +1,19 @@
+{
+  "machine_type": "template",
+  "hostname": "your-hostname",
+  "description": "Brief description of this machine",
+  "os": "macOS / Linux / Windows",
+  "architecture": "arm64 / x86_64",
+  "purpose": "development / server / personal",
+  "created": "YYYY-MM-DD",
+  "updated": "YYYY-MM-DD",
+  "features": {
+    "conda": false,
+    "homebrew": false,
+    "docker": false,
+    "gpu": false
+  },
+  "notes": [
+    "Add any relevant notes about this machine setup"
+  ]
+}

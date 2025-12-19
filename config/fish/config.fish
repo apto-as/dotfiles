@@ -259,64 +259,69 @@ end
 # Prompt Configuration - oh-my-posh (default) with Starship fallback
 # ============================================================================
 # Toggle between oh-my-posh and Starship:
-#   export USE_STARSHIP=1  # Use Starship (experimental)
-#   unset USE_STARSHIP     # Use oh-my-posh (default)
+#   set -gx USE_STARSHIP 1  # Use Starship (experimental)
+#   set -e USE_STARSHIP     # Use oh-my-posh (default)
+#
+# Theme configuration (set in machine-specific config if needed):
+#   set -gx OMP_THEME_PATH "/path/to/theme.omp.json"
 # ============================================================================
 
 if set -q USE_STARSHIP
     # Experimental: Starship (Rust-based, ~8.1ms render time)
-    # Dracula theme with visual parity to oh-my-posh tsuyoshi design
-    set -x STARSHIP_CONFIG ~/.config/starship/dracula.toml
-    starship init fish | source
+    if command -q starship
+        set -x STARSHIP_CONFIG ~/.config/starship/dracula.toml
+        starship init fish | source
+    end
 else
     # Default: oh-my-posh (Go-based, proven design)
-    oh-my-posh init fish --config /opt/homebrew/opt/oh-my-posh/themes/tsuyoshi.omp.json | source
-end
+    if command -q oh-my-posh
+        # Use custom theme path if set, otherwise try common locations
+        if not set -q OMP_THEME_PATH
+            # Try common theme locations
+            for theme_path in \
+                /opt/homebrew/opt/oh-my-posh/themes/tsuyoshi.omp.json \
+                /usr/local/opt/oh-my-posh/themes/tsuyoshi.omp.json \
+                ~/.config/oh-my-posh/themes/tsuyoshi.omp.json \
+                ~/.poshthemes/tsuyoshi.omp.json
+                if test -f $theme_path
+                    set -gx OMP_THEME_PATH $theme_path
+                    break
+                end
+            end
+        end
 
-# ============================================================================
-# Conda Lazy Initialization (Artemis Performance Optimization 2025-12-18)
-# ============================================================================
-# Reduces startup time by ~50-100ms by deferring conda init until first use
-# Original conda init was blocking startup; now loads on-demand
-#
-# Usage: Run 'conda' command normally - it will auto-initialize on first use
-
-set -gx CONDA_EXE /Users/apto-as/miniforge3/bin/conda
-set -gx _CONDA_ROOT /Users/apto-as/miniforge3
-
-function conda --description "Lazy-loaded conda with auto-initialization"
-    # Initialize conda on first use
-    functions -e conda  # Remove this wrapper
-
-    if test -f /Users/apto-as/miniforge3/bin/conda
-        eval /Users/apto-as/miniforge3/bin/conda "shell.fish" hook $argv | source
-    else if test -f "/Users/apto-as/miniforge3/etc/fish/conf.d/conda.fish"
-        source "/Users/apto-as/miniforge3/etc/fish/conf.d/conda.fish"
-    else
-        fish_add_path -p /Users/apto-as/miniforge3/bin
+        if set -q OMP_THEME_PATH; and test -f $OMP_THEME_PATH
+            oh-my-posh init fish --config $OMP_THEME_PATH | source
+        else
+            # Fallback to built-in theme if no custom theme found
+            oh-my-posh init fish | source
+        end
     end
-
-    # Now run the actual conda command
-    conda $argv
 end
 
 # ============================================================================
-# Additional Tool PATH Configuration (Artemis 2025-12-18)
+# Tool PATH Configuration (Portable - uses $HOME)
 # ============================================================================
-# Using fish_add_path for consistency and duplicate prevention
+# These paths use $HOME for portability across machines
+# Machine-specific tools (conda, etc.) are configured in:
+#   machines/{MACHINE_TYPE}/fish.local.fish
 
-# LM Studio CLI
-fish_add_path -a $HOME/.cache/lm-studio/bin
+# Common development tools (if installed)
+# These only add to PATH if the directory exists
+for tool_path in \
+    $HOME/.cache/lm-studio/bin \
+    $HOME/.pixi/bin \
+    $HOME/.codeium/windsurf/bin \
+    $HOME/.bun/bin
+    if test -d $tool_path
+        fish_add_path -a $tool_path
+    end
+end
 
-# Pixi package manager
-fish_add_path -a $HOME/.pixi/bin
-
-# Windsurf (Codeium)
-fish_add_path -a $HOME/.codeium/windsurf/bin
-
-# Bun runtime
-set -gx BUN_INSTALL "$HOME/.bun"
-fish_add_path -a $BUN_INSTALL/bin
+# Bun environment variable (if installed)
+if test -d "$HOME/.bun"
+    set -gx BUN_INSTALL "$HOME/.bun"
+end
 
 # ============================================================
 # Trinitas v2.2.1 Context Profile Management

@@ -74,15 +74,6 @@ config.freetype_render_target = "Normal"
 -- "RESIZE" → ボタン非表示、"TITLE|RESIZE" → ボタン表示
 config.window_decorations = "TITLE | RESIZE"
 
--- macOS背景ブラー効果（モダンで洗練された外観）
--- 0 = 無効、10-30 = 適度なブラー、40+ = 強いブラー
-config.macos_window_background_blur = 20
-
--- ウィンドウ透過設定（ブラー効果と組み合わせ）
--- 1.0 = 完全不透明、0.0 = 完全透明
--- 0.92-0.95推奨: 読みやすさを保ちつつ背景を活かす
-config.window_background_opacity = 0.92
-
 -- ウィンドウパディング
 config.window_padding = {
   left = 8,
