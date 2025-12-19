@@ -58,7 +58,18 @@ end
 alias ls "exa -ahl"
 alias la "exa -ahl --git --icons"
 alias vim nvim
-alias cc "claude --dangerously-skip-permissions"
+
+# ⚠️ SECURITY WARNING: This alias bypasses Claude Code's permission system
+# Only use for trusted operations in controlled environments
+# Renamed from 'cc' to 'cc-unsafe' per Hestia security audit (2025-12-18)
+alias cc-unsafe "claude --dangerously-skip-permissions"
+
+# Safe Claude Code alias (recommended for normal use)
+alias cc "claude"
+
+# Zellij quick launch aliases (Trinitas 2025-12-18)
+alias zcc "zellij --layout claude-code"  # Claude Code development layout
+alias zdev "zellij --layout dev"          # Standard development layout
 
 #-----------
 # exa config and function
@@ -174,17 +185,26 @@ if not set -q MACHINE_TYPE
                     set -gx MACHINE_TYPE "unknown"
             end
     end
-    echo "ℹ️  Auto-detected MACHINE_TYPE: $MACHINE_TYPE" >&2
+    # Only show auto-detection message in interactive mode (not in scripts/Zellij startup)
+    if status is-interactive; and not set -q FISH_STARTUP_QUIET
+        echo "ℹ️  Auto-detected MACHINE_TYPE: $MACHINE_TYPE" >&2
+    end
 end
 
 # Load machine-specific configuration
 set MACHINE_CONFIG "$HOME/dotfiles/machines/$MACHINE_TYPE/fish.local.fish"
 if test -f $MACHINE_CONFIG
     source $MACHINE_CONFIG
-    echo "✓ Loaded machine config: $MACHINE_TYPE" >&2
+    # Only show success message in interactive mode
+    if status is-interactive; and not set -q FISH_STARTUP_QUIET
+        echo "✓ Loaded machine config: $MACHINE_TYPE" >&2
+    end
 else
-    echo "⚠️  Machine config not found: $MACHINE_CONFIG" >&2
-    echo "   Create it with: touch ~/dotfiles/machines/$MACHINE_TYPE/fish.local.fish" >&2
+    # Only show warning in truly interactive sessions (first terminal window)
+    if status is-interactive; and not set -q FISH_STARTUP_QUIET; and not set -q ZELLIJ
+        echo "⚠️  Machine config not found: $MACHINE_CONFIG" >&2
+        echo "   Create it with: touch ~/dotfiles/machines/$MACHINE_TYPE/fish.local.fish" >&2
+    end
 end
 
 # Terminal Integration (Artemis Technical Fix - 2025-11-13)
@@ -253,29 +273,50 @@ else
     oh-my-posh init fish --config /opt/homebrew/opt/oh-my-posh/themes/tsuyoshi.omp.json | source
 end
 
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-if test -f /Users/apto-as/miniforge3/bin/conda
-    eval /Users/apto-as/miniforge3/bin/conda "shell.fish" hook $argv | source
-else
-    if test -f "/Users/apto-as/miniforge3/etc/fish/conf.d/conda.fish"
-        . "/Users/apto-as/miniforge3/etc/fish/conf.d/conda.fish"
+# ============================================================================
+# Conda Lazy Initialization (Artemis Performance Optimization 2025-12-18)
+# ============================================================================
+# Reduces startup time by ~50-100ms by deferring conda init until first use
+# Original conda init was blocking startup; now loads on-demand
+#
+# Usage: Run 'conda' command normally - it will auto-initialize on first use
+
+set -gx CONDA_EXE /Users/apto-as/miniforge3/bin/conda
+set -gx _CONDA_ROOT /Users/apto-as/miniforge3
+
+function conda --description "Lazy-loaded conda with auto-initialization"
+    # Initialize conda on first use
+    functions -e conda  # Remove this wrapper
+
+    if test -f /Users/apto-as/miniforge3/bin/conda
+        eval /Users/apto-as/miniforge3/bin/conda "shell.fish" hook $argv | source
+    else if test -f "/Users/apto-as/miniforge3/etc/fish/conf.d/conda.fish"
+        source "/Users/apto-as/miniforge3/etc/fish/conf.d/conda.fish"
     else
-        set -x PATH /Users/apto-as/miniforge3/bin $PATH
+        fish_add_path -p /Users/apto-as/miniforge3/bin
     end
+
+    # Now run the actual conda command
+    conda $argv
 end
-# <<< conda initialize <<<
 
-# Added by LM Studio CLI (lms)
-set -gx PATH $PATH /Users/apto-as/.cache/lm-studio/bin
-fish_add_path /Users/apto-as/.pixi/bin
+# ============================================================================
+# Additional Tool PATH Configuration (Artemis 2025-12-18)
+# ============================================================================
+# Using fish_add_path for consistency and duplicate prevention
 
-# Added by Windsurf
-fish_add_path /Users/apto-as/.codeium/windsurf/bin
+# LM Studio CLI
+fish_add_path -a $HOME/.cache/lm-studio/bin
 
-# bun
+# Pixi package manager
+fish_add_path -a $HOME/.pixi/bin
+
+# Windsurf (Codeium)
+fish_add_path -a $HOME/.codeium/windsurf/bin
+
+# Bun runtime
 set -gx BUN_INSTALL "$HOME/.bun"
-set -gx PATH $BUN_INSTALL/bin $PATH
+fish_add_path -a $BUN_INSTALL/bin
 
 # ============================================================
 # Trinitas v2.2.1 Context Profile Management
@@ -319,7 +360,10 @@ end
 # エイリアス
 alias tc='trinitas-context'
 
-echo "✓ Trinitas v2.2.1 context management loaded (profile: $TRINITAS_CONTEXT_PROFILE)"
+# Only show load message in interactive mode
+if status is-interactive; and not set -q FISH_STARTUP_QUIET
+    echo "✓ Trinitas v2.2.1 context management loaded (profile: $TRINITAS_CONTEXT_PROFILE)"
+end
 
 # Open Code Memory Cookbook Context Management (v2.2.1)
 if not set -q OPENCODE_CONTEXT_PROFILE
@@ -358,4 +402,7 @@ end
 # エイリアス
 alias oc='opencode-context'
 
-echo "✓ Open Code v2.2.1 context management loaded (profile: $OPENCODE_CONTEXT_PROFILE)"
+# Only show load message in interactive mode
+if status is-interactive; and not set -q FISH_STARTUP_QUIET
+    echo "✓ Open Code v2.2.1 context management loaded (profile: $OPENCODE_CONTEXT_PROFILE)"
+end

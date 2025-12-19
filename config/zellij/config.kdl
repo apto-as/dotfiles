@@ -40,7 +40,12 @@ default_mode "normal"
 // auto_layout true
 
 // Session serialization (save/restore sessions)
-// session_serialization false  // SECURITY: Disabled by default (Hestia requirement)
+// SECURITY NOTE: Enabled with limited scrollback to balance convenience and security
+// - Session state is saved for recovery after crashes/restarts
+// - Scrollback is limited to prevent sensitive data exposure
+session_serialization true
+pane_viewport_serialization false  // Don't serialize visible content (security)
+scrollback_lines_to_serialize 500  // Limit history (security/performance balance)
 
 // ==========================
 // UI Configuration

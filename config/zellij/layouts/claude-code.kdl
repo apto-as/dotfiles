@@ -1,0 +1,117 @@
+// ============================================================================
+// Claude Code Layout - AI-Assisted Development Workspace
+// Purpose: Optimized layout for Claude Code CLI development workflow
+// Author: Trinitas System (Clotho + Lachesis)
+// ============================================================================
+
+layout {
+    default_tab_template {
+        pane size=1 borderless=true {
+            plugin location="zellij:tab-bar"
+        }
+        children
+        pane size=2 borderless=true {
+            plugin location="zellij:status-bar"
+        }
+    }
+
+    // Claude Code Development Tab
+    tab name="claude" focus=true {
+        pane split_direction="vertical" {
+            // Left pane: Code Editor (55% width)
+            pane size="55%" name="editor" focus=true {
+                // Auto-launch Neovim for editing files
+                // command "nvim"
+            }
+
+            // Right side: Claude Code + Terminal (45% width)
+            pane split_direction="horizontal" size="45%" {
+                // Top right: Claude Code CLI (70% height)
+                // Primary workspace for AI-assisted coding
+                pane size="70%" name="claude-code" {
+                    command "claude"
+                }
+
+                // Bottom right: Git/Tests terminal (30% height)
+                pane size="30%" name="terminal"
+            }
+        }
+    }
+
+    // Research Tab (for documentation/browsing)
+    tab name="research" {
+        pane split_direction="horizontal" {
+            // Top: Main research terminal
+            pane size="70%" name="research"
+
+            // Bottom: Notes/scratch
+            pane size="30%" name="notes"
+        }
+    }
+
+    // Git Tab (for version control operations)
+    tab name="git" {
+        pane split_direction="vertical" {
+            // Left: git status/diff
+            pane size="50%" name="git-main" {
+                command "fish" {
+                    args "-c" "git status && echo '---' && git log --oneline -10"
+                }
+            }
+
+            // Right: git operations
+            pane size="50%" name="git-ops"
+        }
+    }
+}
+
+// ============================================================================
+// Usage
+// ============================================================================
+//
+// Load this layout:
+//   zellij --layout claude-code
+//   zellij -l claude-code
+//
+// Quick alias (add to Fish config):
+//   alias zcc "zellij --layout claude-code"
+//
+// Tab Overview:
+//   Tab 1 (claude): Primary development with Claude Code
+//   Tab 2 (research): Research and documentation
+//   Tab 3 (git): Version control operations
+//
+// Typical Workflow:
+//   1. Editor pane (left): Edit files with Neovim
+//   2. Claude Code pane (top right): AI-assisted coding
+//   3. Terminal pane (bottom right): Run tests, git commands
+//
+// Navigation:
+//   Ctrl+g + h/j/k/l : Navigate between panes
+//   Ctrl+g + 1/2/3   : Switch between tabs
+//   Ctrl+g + t       : Create new tab
+//   Ctrl+g + z       : Toggle pane fullscreen
+//
+// Layout structure (Tab 1 - claude):
+//   ┌─────────────────────────────────────┐
+//   │ Tab Bar: [claude] [research] [git]  │
+//   ├────────────────────┬────────────────┤
+//   │                    │                │
+//   │                    │  Claude Code   │
+//   │                    │  (AI Assistant)│
+//   │     Editor         │  70%           │
+//   │     (Neovim)       ├────────────────┤
+//   │     55%            │                │
+//   │                    │  Terminal      │
+//   │                    │  30%           │
+//   ├────────────────────┴────────────────┤
+//   │ Status Bar                          │
+//   └─────────────────────────────────────┘
+//
+// Claude Code Tips:
+//   - Use '/help' in Claude Code for available commands
+//   - Use '/clear' to reset conversation
+//   - Use 'Ctrl+C' to interrupt long operations
+//   - Editor and Claude Code work in sync via file watching
+//
+// ============================================================================
