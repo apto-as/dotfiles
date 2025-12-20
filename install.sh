@@ -16,6 +16,8 @@ source "${LIB_DIR}/core.sh"
 source "${LIB_DIR}/detect.sh"
 source "${LIB_DIR}/backup.sh"
 source "${LIB_DIR}/symlink.sh"
+source "${LIB_DIR}/versions.sh"
+source "${LIB_DIR}/pkg.sh"
 
 # Source installers
 source "${INSTALLERS_DIR}/homebrew.sh"
@@ -25,6 +27,14 @@ source "${INSTALLERS_DIR}/zellij.sh"
 source "${INSTALLERS_DIR}/neovim.sh"
 source "${INSTALLERS_DIR}/fish.sh"
 source "${INSTALLERS_DIR}/tools.sh"
+source "${INSTALLERS_DIR}/node.sh"
+source "${INSTALLERS_DIR}/golang.sh"
+source "${INSTALLERS_DIR}/rust.sh"
+source "${INSTALLERS_DIR}/conda.sh"
+source "${INSTALLERS_DIR}/ohmyposh.sh"
+source "${INSTALLERS_DIR}/docker.sh"
+source "${INSTALLERS_DIR}/claude-code.sh"
+source "${INSTALLERS_DIR}/opencode.sh"
 
 # Main installation flow
 main() {
@@ -40,25 +50,36 @@ main() {
     echo -e "${NC}"
 
     # Phase 1: Validation
-    log_info "[Phase 1/6] System Validation"
+    log_info "[Phase 1/8] System Validation"
     check_dependencies
     export_system_info
     display_system_info
+
+    # Prefetch versions in background (parallel optimization)
+    log_info "Prefetching latest tool versions..."
+    prefetch_versions &
+    local prefetch_pid=$!
     echo ""
 
     # Phase 2: Backup existing configs
-    log_info "[Phase 2/6] Backup Existing Configurations"
+    log_info "[Phase 2/8] Backup Existing Configurations"
     backup_existing_configs
     echo ""
 
-    # Phase 3: Install Homebrew (required for everything else)
-    log_info "[Phase 3/6] Install Homebrew"
+    # Phase 3: Install Homebrew (macOS) / apt update (Ubuntu)
+    log_info "[Phase 3/8] Install Package Manager"
     install_homebrew
     configure_homebrew
     echo ""
 
     # Phase 4: Install dependencies (parallel where possible)
-    log_info "[Phase 4/6] Install Dependencies"
+    log_info "[Phase 4/8] Install Core Dependencies"
+
+    # Ensure version prefetch is complete before installations
+    wait "${prefetch_pid}" 2>/dev/null || true
+    log_debug "Version cache ready: NVM=$(get_latest_nvm_version), Go=$(get_latest_go_version)"
+
+    # Phase 4a: Core tools and shell (parallel)
     install_fonts &
     local fonts_pid=$!
 
@@ -77,7 +98,7 @@ main() {
     install_tools &
     local tools_pid=$!
 
-    # Wait for all parallel installations
+    # Wait for core tools
     wait $fonts_pid && log_success "Fonts installed" || log_warn "Fonts installation had issues"
     wait $wezterm_pid && log_success "Wezterm installed" || log_warn "Wezterm installation had issues"
     wait $zellij_pid && log_success "Zellij installed" || log_warn "Zellij installation had issues"
@@ -86,8 +107,48 @@ main() {
     wait $tools_pid && log_success "Tools installed" || log_warn "Tools installation had issues"
     echo ""
 
-    # Phase 5: Setup configurations (symlinks)
-    log_info "[Phase 5/6] Setup Configurations"
+    # Phase 5: Install development languages (parallel)
+    log_info "[Phase 5/8] Install Development Languages"
+
+    install_node &
+    local node_pid=$!
+
+    install_golang &
+    local golang_pid=$!
+
+    install_rust &
+    local rust_pid=$!
+
+    install_conda &
+    local conda_pid=$!
+
+    # Wait for language installations
+    wait $node_pid && log_success "Node.js (NVM) installed" || log_warn "Node.js installation had issues"
+    wait $golang_pid && log_success "Go installed" || log_warn "Go installation had issues"
+    wait $rust_pid && log_success "Rust installed" || log_warn "Rust installation had issues"
+    wait $conda_pid && log_success "Miniforge3 installed" || log_warn "Conda installation had issues"
+    echo ""
+
+    # Phase 6: Install additional tools (parallel)
+    log_info "[Phase 6/8] Install Additional Tools"
+
+    install_ohmyposh &
+    local ohmyposh_pid=$!
+
+    install_docker &
+    local docker_pid=$!
+
+    # Wait for additional tools
+    wait $ohmyposh_pid && log_success "oh-my-posh installed" || log_warn "oh-my-posh installation had issues"
+    wait $docker_pid && log_success "Docker installed" || log_warn "Docker installation had issues"
+
+    # Install AI coding assistants (requires Node.js, so sequential after Phase 5)
+    install_claude_code && log_success "Claude Code installed" || log_warn "Claude Code installation had issues"
+    install_opencode && log_success "Open Code installed" || log_warn "Open Code installation had issues"
+    echo ""
+
+    # Phase 7: Setup configurations (symlinks)
+    log_info "[Phase 7/8] Setup Configurations"
     setup_symlinks
     setup_machine_specific_configs
     configure_zellij  # Initialize Zellij directories
@@ -96,8 +157,8 @@ main() {
     add_fish_to_shells
     echo ""
 
-    # Phase 6: Verification
-    log_info "[Phase 6/6] Verification"
+    # Phase 8: Verification
+    log_info "[Phase 8/8] Verification"
     verify_installation
     echo ""
 
@@ -164,13 +225,25 @@ setup_machine_specific_configs() {
 verify_installation() {
     local errors=0
 
-    # Verify commands
+    # Verify core commands
     verify_wezterm || ((errors++))
     verify_zellij || ((errors++))
     verify_neovim || ((errors++))
     verify_fish || ((errors++))
     verify_fonts || ((errors++))
     verify_tools || ((errors++))
+
+    # Verify development languages
+    verify_node || log_warn "Node.js verification skipped"
+    verify_golang || log_warn "Go verification skipped"
+    verify_rust || log_warn "Rust verification skipped"
+    verify_conda || log_warn "Conda verification skipped"
+
+    # Verify additional tools
+    verify_ohmyposh || log_warn "oh-my-posh verification skipped"
+    verify_docker || log_warn "Docker verification skipped"
+    verify_claude_code || log_warn "Claude Code verification skipped"
+    verify_opencode || log_warn "Open Code verification skipped"
 
     # Verify symlinks
     local -a symlink_mappings=(
@@ -209,7 +282,8 @@ show_next_steps() {
     echo "  4. Open Wezterm to see the new configuration"
     echo "  5. Launch Zellij: zellij (or press Ctrl+a z in Wezterm)"
     echo "  6. Open Neovim to trigger LazyVim bootstrap: nvim"
-    echo "  7. (Optional) Bootstrap LazyVim now: ${DOTFILES_DIR}/scripts/bootstrap-nvim.sh"
+    echo "  7. (Optional) Start Docker Desktop (macOS) or enable Docker service (Linux)"
+    echo "  8. (Optional) Configure Claude Code: claude config"
     echo ""
     log_info "Configuration locations:"
     echo "  • Dotfiles: ${DOTFILES_DIR}"
@@ -217,15 +291,25 @@ show_next_steps() {
     echo "  • Wezterm: ~/.config/wezterm -> ${DOTFILES_DIR}/config/wezterm"
     echo "  • Zellij: ~/.config/zellij -> ${DOTFILES_DIR}/config/zellij"
     echo "  • Fish: ~/.config/fish/config.fish -> ${DOTFILES_DIR}/config/fish/config.fish"
+    echo "  • Claude Code: ~/.claude/"
+    echo "  • Open Code: ~/.config/opencode/"
     echo "  • Credentials: ~/.secure_credentials/ (chmod 700)"
     echo "  • Backup: ${BACKUP_DIR}/${BACKUP_TIMESTAMP}"
+    echo ""
+    log_info "Installed Development Tools:"
+    echo "  • Languages: Node.js (nvm), Go, Rust, Python (conda/miniforge)"
+    echo "  • Containers: Docker"
+    echo "  • AI Assistants: Claude Code, Open Code"
+    echo "  • Shell: Fish, oh-my-posh, zoxide, fzf"
     echo ""
     log_info "Useful commands:"
     echo "  • Update dotfiles: ${DOTFILES_DIR}/update.sh"
     echo "  • List backups: ${DOTFILES_DIR}/install.sh --list-backups"
     echo "  • Rollback: ${DOTFILES_DIR}/install.sh --rollback"
     echo "  • Launch Zellij: zellij"
-    echo "  • Zellij keybindings: Ctrl+g ? (inside Zellij)"
+    echo "  • Start Claude Code: claude"
+    echo "  • Activate conda: conda activate <env>"
+    echo "  • Node version: nvm use <version>"
     echo ""
 }
 

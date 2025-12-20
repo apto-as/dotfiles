@@ -1,0 +1,299 @@
+#!/usr/bin/env bash
+# ============================================================================
+# installers/node.sh - Node.js via NVM
+# Purpose: Install NVM and Node.js LTS
+# Platforms: macOS, Ubuntu
+# Note: Respects existing Fisher fish-nvm or Homebrew Node installations
+# ============================================================================
+
+# Configuration
+readonly NVM_DIR="${HOME}/.nvm"
+
+# ============================================================================
+# Main Installation
+# ============================================================================
+
+install_node() {
+    log_info "Installing Node.js..."
+
+    # Check for existing Node.js installations
+    if check_existing_node_setup; then
+        log_success "Node.js already configured (existing setup preserved)"
+        return 0
+    fi
+
+    # Install NVM first
+    install_nvm
+
+    # Install Node.js LTS
+    install_nodejs_lts
+
+    # Setup Fish integration
+    setup_nvm_fish
+
+    log_success "Node.js installation complete"
+}
+
+# ============================================================================
+# Existing Setup Detection
+# ============================================================================
+
+check_existing_node_setup() {
+    # Check for Fisher's fish-nvm plugin
+    if [[ -f "${HOME}/.config/fish/conf.d/nvm.fish" ]]; then
+        if grep -q "jorgebucaran\|fish-nvm\|nvm_mirror" "${HOME}/.config/fish/conf.d/nvm.fish" 2>/dev/null; then
+            log_info "Detected Fisher fish-nvm plugin - skipping nvm-sh/nvm installation"
+            log_debug "Using existing Fish-native NVM setup"
+            return 0
+        fi
+    fi
+
+    # Check for Homebrew Node on macOS
+    if [[ "${DETECTED_OS}" == "macos" ]] && command_exists node; then
+        local node_path
+        node_path=$(which node 2>/dev/null)
+        if [[ "${node_path}" == "/opt/homebrew/bin/node" || "${node_path}" == "/usr/local/bin/node" ]]; then
+            log_info "Detected Homebrew Node.js - skipping NVM installation"
+            log_debug "Using existing Homebrew Node: $(node --version 2>/dev/null)"
+            return 0
+        fi
+    fi
+
+    # Check for existing nvm-sh/nvm installation
+    if [[ -d "${NVM_DIR}" ]] && [[ -s "${NVM_DIR}/nvm.sh" ]]; then
+        log_info "Detected existing nvm-sh/nvm installation"
+        # Update to latest LTS
+        install_nodejs_lts
+        return 0
+    fi
+
+    # No existing setup found
+    return 1
+}
+
+# ============================================================================
+# NVM Installation
+# ============================================================================
+
+install_nvm() {
+    if [[ -d "${NVM_DIR}" ]] && [[ -s "${NVM_DIR}/nvm.sh" ]]; then
+        log_debug "NVM already installed"
+        return 0
+    fi
+
+    log_info "Installing NVM..."
+
+    # Get latest NVM version dynamically
+    local nvm_version
+    nvm_version=$(get_latest_nvm_version)
+
+    log_info "Installing NVM ${nvm_version}..."
+
+    # Download and run NVM installer
+    curl -o- "https://raw.githubusercontent.com/nvm-sh/nvm/${nvm_version}/install.sh" | bash
+
+    # Verify installation
+    if [[ -s "${NVM_DIR}/nvm.sh" ]]; then
+        log_success "NVM ${nvm_version} installed successfully"
+    else
+        log_error "NVM installation failed"
+        return 1
+    fi
+}
+
+# ============================================================================
+# Node.js Installation
+# ============================================================================
+
+install_nodejs_lts() {
+    log_info "Installing Node.js LTS..."
+
+    # Source NVM
+    export NVM_DIR="${HOME}/.nvm"
+    [[ -s "${NVM_DIR}/nvm.sh" ]] && source "${NVM_DIR}/nvm.sh"
+
+    # Verify NVM is available
+    if ! command -v nvm &>/dev/null; then
+        log_error "NVM not available after installation"
+        return 1
+    fi
+
+    # Install latest LTS
+    log_info "Installing latest Node.js LTS..."
+    nvm install --lts
+
+    # Set as default
+    nvm alias default 'lts/*'
+
+    # Verify installation
+    local node_version
+    node_version=$(node --version 2>/dev/null || echo "N/A")
+    local npm_version
+    npm_version=$(npm --version 2>/dev/null || echo "N/A")
+
+    log_success "Node.js installed: ${node_version} (npm ${npm_version})"
+}
+
+# ============================================================================
+# Fish Shell Integration
+# ============================================================================
+
+setup_nvm_fish() {
+    log_info "Setting up NVM Fish integration..."
+
+    local fish_conf_dir="${HOME}/.config/fish/conf.d"
+    local nvm_fish_file="${fish_conf_dir}/nvm.fish"
+
+    mkdir -p "${fish_conf_dir}"
+
+    # Create Fish configuration for NVM
+    cat > "${nvm_fish_file}" << 'EOF'
+# ============================================================================
+# NVM (Node Version Manager) Integration for Fish
+# Generated by dotfiles installer
+# ============================================================================
+
+# NVM directory
+set -gx NVM_DIR "$HOME/.nvm"
+
+# Lazy-load NVM for faster shell startup
+function nvm --description "Lazy-loaded NVM"
+    # Remove this wrapper
+    functions -e nvm
+
+    # Load NVM (using bass for bash script compatibility)
+    if test -s "$NVM_DIR/nvm.sh"
+        # Check if bass is available, otherwise use fallback
+        if type -q bass
+            bass source "$NVM_DIR/nvm.sh"
+        else
+            # Direct PATH manipulation fallback
+            set -l default_version (cat "$NVM_DIR/alias/default" 2>/dev/null)
+            if test -n "$default_version"
+                set -l node_path "$NVM_DIR/versions/node/$default_version/bin"
+                if test -d "$node_path"
+                    fish_add_path -p "$node_path"
+                end
+            end
+        end
+    end
+
+    # Run the actual nvm command
+    nvm $argv
+end
+
+# Auto-load Node.js if .nvmrc exists
+function __nvm_auto_use --on-variable PWD --description "Auto-switch Node version"
+    if test -f .nvmrc
+        # Trigger NVM loading
+        nvm use 2>/dev/null
+    end
+end
+
+# Add default Node to PATH immediately (for faster startup)
+set -l default_version_file "$NVM_DIR/alias/default"
+if test -f "$default_version_file"
+    set -l default_version (cat "$default_version_file")
+    # Handle 'lts/*' alias
+    if string match -q "lts/*" "$default_version"
+        # Find the actual LTS version
+        set -l lts_dir "$NVM_DIR/versions/node"
+        if test -d "$lts_dir"
+            set -l latest_lts (ls -1 "$lts_dir" 2>/dev/null | sort -V | tail -1)
+            if test -n "$latest_lts"
+                set default_version "$latest_lts"
+            end
+        end
+    end
+
+    set -l node_path "$NVM_DIR/versions/node/$default_version/bin"
+    if test -d "$node_path"
+        fish_add_path -p "$node_path"
+    end
+end
+EOF
+
+    log_success "NVM Fish integration configured: ${nvm_fish_file}"
+}
+
+# ============================================================================
+# Verification
+# ============================================================================
+
+verify_node() {
+    local errors=0
+
+    # Check NVM
+    if [[ -s "${NVM_DIR}/nvm.sh" ]]; then
+        log_success "NVM installed"
+    else
+        log_error "NVM not found"
+        ((errors++))
+    fi
+
+    # Check Node.js
+    if command_exists node; then
+        local version
+        version=$(node --version 2>/dev/null)
+        log_success "Node.js installed: ${version}"
+    else
+        log_error "Node.js not found"
+        ((errors++))
+    fi
+
+    # Check npm
+    if command_exists npm; then
+        local version
+        version=$(npm --version 2>/dev/null)
+        log_success "npm installed: v${version}"
+    else
+        log_warn "npm not found"
+    fi
+
+    return "${errors}"
+}
+
+# ============================================================================
+# Utility Functions
+# ============================================================================
+
+# Update Node.js to latest LTS
+update_node() {
+    log_info "Updating Node.js to latest LTS..."
+
+    export NVM_DIR="${HOME}/.nvm"
+    [[ -s "${NVM_DIR}/nvm.sh" ]] && source "${NVM_DIR}/nvm.sh"
+
+    nvm install --lts
+    nvm alias default 'lts/*'
+
+    log_success "Node.js updated to: $(node --version)"
+}
+
+# Install global npm packages
+install_npm_globals() {
+    log_info "Installing global npm packages..."
+
+    local -a packages=(
+        "typescript"
+        "ts-node"
+        "prettier"
+        "eslint"
+    )
+
+    export NVM_DIR="${HOME}/.nvm"
+    [[ -s "${NVM_DIR}/nvm.sh" ]] && source "${NVM_DIR}/nvm.sh"
+
+    for pkg in "${packages[@]}"; do
+        if npm list -g "${pkg}" &>/dev/null; then
+            log_debug "${pkg} already installed globally"
+        else
+            log_info "Installing ${pkg}..."
+            npm install -g "${pkg}"
+        fi
+    done
+}
+
+# Export functions
+export -f install_node install_nvm install_nodejs_lts setup_nvm_fish verify_node
+export -f update_node install_npm_globals

@@ -115,29 +115,9 @@ config.tab_max_width = 32
 config.enable_scroll_bar = false
 
 -- ============================================================================
--- キーバインド設定
+-- キーバインド設定 (Note: Full keybindings defined below in Zellij section)
 -- ============================================================================
-
-config.keys = {
-  -- Cmd+K でスクロールバックをクリア（macOS標準）
-  {
-    key = "k",
-    mods = "CMD",
-    action = wezterm.action.ClearScrollback("ScrollbackAndViewport"),
-  },
-  -- Cmd+T で新しいタブ（タブバー非表示でも機能）
-  {
-    key = "t",
-    mods = "CMD",
-    action = wezterm.action.SpawnTab("CurrentPaneDomain"),
-  },
-  -- tmux prefix (Ctrl-b) を保護
-  {
-    key = "b",
-    mods = "CTRL",
-    action = wezterm.action.SendKey { key = "b", mods = "CTRL" },
-  },
-}
+-- Keybindings are consolidated in the "Keybindings for Zellij Integration and Claude Code" section
 
 -- ============================================================================
 -- ベル設定
@@ -269,10 +249,31 @@ else
 end
 
 -- ============================================================================
--- Keybindings for Zellij Integration
+-- Keybindings (Consolidated)
 -- ============================================================================
 config.keys = {
-  -- Ctrl+Alt+z: Quick Zellij attach/launch
+  -- Cmd+K: Clear scrollback (macOS standard)
+  {
+    key = "k",
+    mods = "CMD",
+    action = wezterm.action.ClearScrollback("ScrollbackAndViewport"),
+  },
+
+  -- Cmd+T: New tab (works even when tab bar is hidden)
+  {
+    key = "t",
+    mods = "CMD",
+    action = wezterm.action.SpawnTab("CurrentPaneDomain"),
+  },
+
+  -- Ctrl+B: Protect tmux prefix
+  {
+    key = "b",
+    mods = "CTRL",
+    action = wezterm.action.SendKey { key = "b", mods = "CTRL" },
+  },
+
+  -- Ctrl+Alt+Z: Quick Zellij attach/launch
   -- CHANGED from Ctrl+z to Ctrl+Alt+z (Athena 2025-12-18): Avoid conflict with Neovim Undo
   {
     key = 'z',
@@ -281,6 +282,21 @@ config.keys = {
       -- CRITICAL FIX (Artemis 2025-11-17): Use absolute path for keybinding
       args = { '/opt/homebrew/bin/zellij', 'attach', '--create' },
     },
+  },
+
+  -- Shift+Enter: Send newline character for Claude Code multi-line input
+  -- FIX (2025-12-20): Alt+Enter conflicts with Wezterm, use Shift+Enter instead
+  {
+    key = 'Enter',
+    mods = 'SHIFT',
+    action = wezterm.action.SendString '\n',
+  },
+
+  -- Alt+Enter: Also map to newline for compatibility
+  {
+    key = 'Enter',
+    mods = 'ALT',
+    action = wezterm.action.SendString '\n',
   },
 }
 
