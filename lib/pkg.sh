@@ -16,33 +16,30 @@ source "${SCRIPT_DIR}/detect.sh"
 # ============================================================================
 # Some packages have different names across package managers.
 # This mapping translates from canonical names to platform-specific names.
+# Note: Using function-based lookup for Bash 3.x compatibility (macOS default)
 
-# Ubuntu apt package name overrides (canonical -> apt name)
-# Note: Associative arrays require Bash 4.0+
-declare -A PKG_APT_NAME_MAP
-PKG_APT_NAME_MAP["fd"]="fd-find"
-PKG_APT_NAME_MAP["ripgrep"]="ripgrep"  # same name, but command is 'rg'
-# Note: bat package is 'bat' but command is 'batcat' on Ubuntu
-
-# Helper function to safely get apt package name (avoids set -u issues)
+# Helper function to get apt package name (canonical -> apt name)
 _get_apt_pkg_name() {
     local pkg="$1"
-    if [[ -v PKG_APT_NAME_MAP[$pkg] ]]; then
-        echo "${PKG_APT_NAME_MAP[$pkg]}"
-    else
-        echo "$pkg"
-    fi
+    case "$pkg" in
+        fd)      echo "fd-find" ;;
+        # Note: bat package is 'bat' but command is 'batcat' on Ubuntu
+        *)       echo "$pkg" ;;
+    esac
 }
 
-# Ubuntu packages that require official repositories
-declare -a PKG_APT_EXTERNAL=(
-    "gh"        # GitHub CLI - needs official repo
-    "eza"       # eza - needs cargo or official repo
-    "zoxide"    # needs cargo or official installer
-    "yq"        # needs official binary
-    "uv"        # needs official installer
-    "ghq"       # needs go install
-)
+# Check if a package requires external repository on Ubuntu
+_is_apt_external_pkg() {
+    local pkg="$1"
+    case "$pkg" in
+        gh|eza|zoxide|yq|uv|ghq)
+            return 0
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
 
 # ============================================================================
 # Core Package Functions
@@ -392,13 +389,7 @@ EOF
 # Check if a package requires external repository on Ubuntu
 pkg_needs_external_repo() {
     local pkg="$1"
-
-    for external in "${PKG_APT_EXTERNAL[@]}"; do
-        if [[ "${pkg}" == "${external}" ]]; then
-            return 0
-        fi
-    done
-    return 1
+    _is_apt_external_pkg "$pkg"
 }
 
 # Get the command name for a package (may differ from package name)
