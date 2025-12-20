@@ -163,6 +163,12 @@ setup_docker_fish() {
     local fish_conf_dir="${HOME}/.config/fish/conf.d"
     local docker_fish_file="${fish_conf_dir}/docker.fish"
 
+    # Check if docker.fish already exists
+    if [[ -f "${docker_fish_file}" ]]; then
+        log_debug "Docker Fish config already exists: ${docker_fish_file}"
+        return 0
+    fi
+
     mkdir -p "${fish_conf_dir}"
 
     cat > "${docker_fish_file}" << 'EOF'
