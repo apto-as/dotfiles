@@ -6,7 +6,7 @@
 -- Zellij Compatibility Notes
 -- ============================================================================
 -- Zellij keybindings (terminal multiplexer):
---   Ctrl+g       : Zellij prefix (enters tmux mode)
+--   Ctrl+g       : Zellij prefix (enters command mode)
 --   Ctrl+g + h/j/k/l : Navigate panes
 --
 -- Neovim keybindings (default LazyVim):

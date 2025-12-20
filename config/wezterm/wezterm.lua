@@ -7,9 +7,9 @@
 --   - Dracula Theme (Official)
 --   - Custom background image with HSB adjustment
 --   - PlemolJP Console NF font (size 14)
---   - Tab bar hidden (tmux-first approach)
+--   - Tab bar hidden (Zellij-first approach)
 --   - GPU acceleration (WebGpu)
---   - Performance optimizations for tmux
+--   - Performance optimizations
 -- ============================================================================
 
 local wezterm = require('wezterm')
@@ -108,10 +108,10 @@ config.hide_tab_bar_if_only_one_tab = true
 config.tab_max_width = 32
 
 -- ============================================================================
--- tmux統合最適化
+-- Zellij統合最適化
 -- ============================================================================
 
--- スクロールバー無効化（tmuxのスクロール機能を使用）
+-- スクロールバー無効化（Zellijのスクロール機能を使用）
 config.enable_scroll_bar = false
 
 -- ============================================================================
@@ -140,8 +140,6 @@ config.automatically_reload_config = true
 -- デフォルトシェルの設定（オプション）
 -- config.default_prog = { "/bin/zsh", "-l" }
 
--- tmux自動起動（オプション - 必要に応じてコメント解除）
--- config.default_prog = { "/bin/zsh", "-l", "-c", "tmux new-session -As main" }
 
 -- ============================================================================
 -- タブデザイン（Draculaテーマ + 背景画像透過）
@@ -264,13 +262,6 @@ config.keys = {
     key = "t",
     mods = "CMD",
     action = wezterm.action.SpawnTab("CurrentPaneDomain"),
-  },
-
-  -- Ctrl+B: Protect tmux prefix
-  {
-    key = "b",
-    mods = "CTRL",
-    action = wezterm.action.SendKey { key = "b", mods = "CTRL" },
   },
 
   -- Ctrl+Alt+Z: Quick Zellij attach/launch
