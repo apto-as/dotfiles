@@ -276,32 +276,56 @@ end)
 -- ============================================================================
 
 -- Zellij session selector script (inline Fish)
+-- Fixed (Artemis 2025-12-20): Add PATH, dependency checks, and fallback to interactive shell
 local zellij_session_selector = [[
+  # Ensure Homebrew binaries are in PATH
+  fish_add_path -g /opt/homebrew/bin /usr/local/bin
+
+  # Check if zellij exists
+  if not command -q zellij
+    echo "[Wezterm] zellij not found in PATH. Starting plain Fish shell."
+    exec fish
+  end
+
+  # Check if fzf exists (needed for multi-session selection)
+  set -l has_fzf (command -q fzf; and echo 1; or echo 0)
+
   set sessions (zellij list-sessions 2>/dev/null | string trim)
 
   if test -z "$sessions"
     # No sessions - create new one
-    zellij
+    exec zellij
   else
     set session_count (echo "$sessions" | wc -l | string trim)
 
     if test "$session_count" -eq 1
       # Only one session - attach directly
       set session_name (echo "$sessions" | head -1 | awk '{print $1}')
-      zellij attach "$session_name"
+      exec zellij attach "$session_name"
     else
-      # Multiple sessions - use fzf to select
-      set selected (echo "$sessions" | fzf --height=40% --reverse --header="Select Zellij Session (or Ctrl+C for new)")
+      # Multiple sessions
+      if test "$has_fzf" -eq 1
+        # Use fzf to select
+        set selected (echo "$sessions" | fzf --height=40% --reverse --header="Select Zellij Session (or Ctrl+C for new)")
 
-      if test -n "$selected"
-        set session_name (echo "$selected" | awk '{print $1}')
-        zellij attach "$session_name"
+        if test -n "$selected"
+          set session_name (echo "$selected" | awk '{print $1}')
+          exec zellij attach "$session_name"
+        else
+          # User cancelled - create new session
+          exec zellij
+        end
       else
-        # User cancelled - create new session
-        zellij
+        # No fzf - attach to first session
+        echo "[Wezterm] fzf not found. Attaching to first session."
+        set session_name (echo "$sessions" | head -1 | awk '{print $1}')
+        exec zellij attach "$session_name"
       end
     end
   end
+
+  # Fallback: if we reach here somehow, start interactive shell
+  exec fish
 ]]
 
 -- Check if Zellij auto-start is enabled (default: true - 2025-12-20)
