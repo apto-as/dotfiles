@@ -59,15 +59,16 @@ if test -d $CONDA_BASE
     function conda --description "Lazy-loaded conda with auto-initialization"
         functions -e conda  # Remove this wrapper
 
+        # Initialize conda (hook doesn't accept arguments)
         if test -f $CONDA_EXE
-            eval $CONDA_EXE "shell.fish" hook $argv | source
+            eval $CONDA_EXE "shell.fish" hook | source
         else if test -f "$_CONDA_ROOT/etc/fish/conf.d/conda.fish"
             source "$_CONDA_ROOT/etc/fish/conf.d/conda.fish"
         else
             fish_add_path -p "$_CONDA_ROOT/bin"
         end
 
-        # Run the actual conda command
+        # Run the actual conda command with original arguments
         conda $argv
     end
 end
