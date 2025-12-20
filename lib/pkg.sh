@@ -18,11 +18,21 @@ source "${SCRIPT_DIR}/detect.sh"
 # This mapping translates from canonical names to platform-specific names.
 
 # Ubuntu apt package name overrides (canonical -> apt name)
-declare -A PKG_APT_NAME_MAP=(
-    ["fd"]="fd-find"
-    ["ripgrep"]="ripgrep"  # same name, but command is 'rg'
-    # Note: bat package is 'bat' but command is 'batcat' on Ubuntu
-)
+# Note: Associative arrays require Bash 4.0+
+declare -A PKG_APT_NAME_MAP
+PKG_APT_NAME_MAP["fd"]="fd-find"
+PKG_APT_NAME_MAP["ripgrep"]="ripgrep"  # same name, but command is 'rg'
+# Note: bat package is 'bat' but command is 'batcat' on Ubuntu
+
+# Helper function to safely get apt package name (avoids set -u issues)
+_get_apt_pkg_name() {
+    local pkg="$1"
+    if [[ -v PKG_APT_NAME_MAP[$pkg] ]]; then
+        echo "${PKG_APT_NAME_MAP[$pkg]}"
+    else
+        echo "$pkg"
+    fi
+}
 
 # Ubuntu packages that require official repositories
 declare -a PKG_APT_EXTERNAL=(
@@ -101,7 +111,8 @@ pkg_is_installed() {
             brew list "${pkg}" &>/dev/null
             ;;
         ubuntu|debian)
-            local apt_pkg="${PKG_APT_NAME_MAP[$pkg]:-$pkg}"
+            local apt_pkg
+            apt_pkg=$(_get_apt_pkg_name "$pkg")
             dpkg -l "${apt_pkg}" 2>/dev/null | grep -q "^ii"
             ;;
     esac
@@ -162,7 +173,8 @@ _pkg_install_brew_batch() {
 
 _pkg_install_apt() {
     local pkg="$1"
-    local apt_pkg="${PKG_APT_NAME_MAP[$pkg]:-$pkg}"
+    local apt_pkg
+    apt_pkg=$(_get_apt_pkg_name "$pkg")
 
     if dpkg -l "${apt_pkg}" 2>/dev/null | grep -q "^ii"; then
         log_debug "${pkg} (${apt_pkg}) already installed (apt)"
@@ -178,7 +190,8 @@ _pkg_install_apt_batch() {
     local -a to_install=()
 
     for pkg in "${packages[@]}"; do
-        local apt_pkg="${PKG_APT_NAME_MAP[$pkg]:-$pkg}"
+        local apt_pkg
+        apt_pkg=$(_get_apt_pkg_name "$pkg")
         if ! dpkg -l "${apt_pkg}" 2>/dev/null | grep -q "^ii"; then
             to_install+=("${apt_pkg}")
         else
