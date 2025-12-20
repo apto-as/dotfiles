@@ -59,16 +59,32 @@ install_ohmyposh_ubuntu() {
     if command_exists oh-my-posh; then
         log_debug "oh-my-posh already installed"
 
-        # Update to latest
+        # Update to latest - SECURITY: Download to temp file first
         log_info "Updating oh-my-posh..."
-        curl -s https://ohmyposh.dev/install.sh | bash -s
+        local tmp_script
+        tmp_script=$(mktemp)
+        if curl -fsSL "https://ohmyposh.dev/install.sh" -o "${tmp_script}"; then
+            bash "${tmp_script}"
+        else
+            log_error "Failed to download oh-my-posh install script"
+        fi
+        rm -f "${tmp_script}"
         return 0
     fi
 
     log_info "Installing oh-my-posh via official installer..."
 
-    # Use official installer script
-    curl -s https://ohmyposh.dev/install.sh | bash -s
+    # Use official installer script - SECURITY: Download to temp file first
+    local tmp_script
+    tmp_script=$(mktemp)
+    if curl -fsSL "https://ohmyposh.dev/install.sh" -o "${tmp_script}"; then
+        bash "${tmp_script}"
+    else
+        log_error "Failed to download oh-my-posh install script"
+        rm -f "${tmp_script}"
+        return 1
+    fi
+    rm -f "${tmp_script}"
 
     # Verify installation
     if command_exists oh-my-posh; then
@@ -212,7 +228,17 @@ update_ohmyposh() {
             brew upgrade oh-my-posh
             ;;
         ubuntu|debian)
-            curl -s https://ohmyposh.dev/install.sh | bash -s
+            # SECURITY: Download to temp file first
+            local tmp_script
+            tmp_script=$(mktemp)
+            if curl -fsSL "https://ohmyposh.dev/install.sh" -o "${tmp_script}"; then
+                bash "${tmp_script}"
+            else
+                log_error "Failed to download oh-my-posh install script"
+                rm -f "${tmp_script}"
+                return 1
+            fi
+            rm -f "${tmp_script}"
             ;;
     esac
 

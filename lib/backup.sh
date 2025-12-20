@@ -19,6 +19,12 @@ init_backup() {
 
 # Backup single file/directory
 backup_item() {
+    # Argument validation - SECURITY: Prevent undefined behavior
+    if [[ $# -lt 1 ]]; then
+        log_error "backup_item: requires 1 argument (target), got $#"
+        return 1
+    fi
+
     local target="$1"
 
     if [[ ! -e "${target}" ]]; then
@@ -32,9 +38,9 @@ backup_item() {
     mkdir -p "$(dirname "${dest}")"
 
     if [[ -d "${target}" ]]; then
-        cp -R "${target}" "${dest}" 2>/dev/null || true
+        cp -R "${target}" "${dest}" 2>/dev/null || log_warn "backup_item: failed to copy directory ${target}"
     else
-        cp "${target}" "${dest}" 2>/dev/null || true
+        cp "${target}" "${dest}" 2>/dev/null || log_warn "backup_item: failed to copy file ${target}"
     fi
 
     echo "${target}" >> "${BACKUP_MANIFEST}"

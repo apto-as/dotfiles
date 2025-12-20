@@ -10,6 +10,12 @@ source "${SCRIPT_DIR}/backup.sh"
 
 # Create symlink with backup
 create_symlink() {
+    # Argument validation - SECURITY: Prevent undefined behavior
+    if [[ $# -lt 2 ]]; then
+        log_error "create_symlink: requires 2 arguments (source, destination), got $#"
+        return 1
+    fi
+
     local src="$1"
     local dest="$2"
 
@@ -82,6 +88,12 @@ verify_symlinks() {
 
 # Remove symlink safely
 remove_symlink() {
+    # Argument validation - SECURITY: Prevent undefined behavior
+    if [[ $# -lt 1 ]]; then
+        log_error "remove_symlink: requires 1 argument (destination), got $#"
+        return 1
+    fi
+
     local dest="$1"
 
     if [[ -L "${dest}" ]]; then

@@ -45,18 +45,20 @@ fish_add_path -a $HOME/.cargo/bin
 set -x AWS_PROFILE aws-mcp-admin-agents
 
 # NVM
-function __check_rvm --on-variable PWD --description 'Do nvm stuff'
+function __check_nvmrc --on-variable PWD --description 'Auto-switch Node version based on .nvmrc'
     status --is-command-substitution; and return
 
     if test -f .nvmrc; and test -r .nvmrc
-        nvm use lts
-    else
+        set -l node_version (string trim < .nvmrc)
+        if test -n "$node_version"
+            nvm use "$node_version" 2>/dev/null; or nvm use lts 2>/dev/null
+        end
     end
 end
 
 # alias
-alias ls "exa -ahl"
-alias la "exa -ahl --git --icons"
+alias ls "eza -ahl"
+alias la "eza -ahl --git --icons"
 alias vim nvim
 
 # ⚠️ SECURITY WARNING: This alias bypasses Claude Code's permission system
@@ -72,7 +74,7 @@ alias zcc "zellij --layout claude-code"  # Claude Code development layout
 alias zdev "zellij --layout dev"          # Standard development layout
 
 #-----------
-# exa config and function
+# eza config and function
 #-----------
 function cd
     if test (count $argv) -eq 0
@@ -107,7 +109,7 @@ function cd
         return 1
     end
     pwd
-    exa -ahl --git --icons
+    eza -ahl --git --icons
     return $status
 end
 

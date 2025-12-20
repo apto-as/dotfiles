@@ -89,8 +89,17 @@ install_nvm() {
 
     log_info "Installing NVM ${nvm_version}..."
 
-    # Download and run NVM installer
-    curl -o- "https://raw.githubusercontent.com/nvm-sh/nvm/${nvm_version}/install.sh" | bash
+    # Download and run NVM installer - SECURITY: Download to temp file first
+    local tmp_script
+    tmp_script=$(mktemp)
+    if curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/${nvm_version}/install.sh" -o "${tmp_script}"; then
+        bash "${tmp_script}"
+    else
+        log_error "Failed to download NVM install script"
+        rm -f "${tmp_script}"
+        return 1
+    fi
+    rm -f "${tmp_script}"
 
     # Verify installation
     if [[ -s "${NVM_DIR}/nvm.sh" ]]; then
