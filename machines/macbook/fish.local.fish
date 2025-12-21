@@ -48,28 +48,45 @@ end
 # ============================================================================
 # This machine uses Miniforge (conda) installed at ~/miniforge3
 # Lazy initialization for faster shell startup (~50-100ms saved)
+#
+# Note: If you want base environment auto-activated, run:
+#   conda config --set auto_activate_base true
+# ============================================================================
 
-set -l CONDA_BASE "$HOME/miniforge3"
+set -gx CONDA_BASE "$HOME/miniforge3"
 
 if test -d $CONDA_BASE
+    # Set conda environment variables
     set -gx CONDA_EXE "$CONDA_BASE/bin/conda"
-    set -gx _CONDA_ROOT $CONDA_BASE
+    set -gx _CONDA_ROOT "$CONDA_BASE"
+    set -gx _CONDA_EXE "$CONDA_BASE/bin/conda"
 
-    # Lazy-load conda on first use
+    # Lazy-load conda on first use (saves ~50-100ms on shell startup)
     function conda --description "Lazy-loaded conda with auto-initialization"
-        functions -e conda  # Remove this wrapper
+        # Remove this wrapper function
+        functions -e conda
 
-        # Initialize conda (hook doesn't accept arguments)
-        if test -f $CONDA_EXE
-            eval $CONDA_EXE "shell.fish" hook | source
-        else if test -f "$_CONDA_ROOT/etc/fish/conf.d/conda.fish"
+        # Source the conda initialization script (the reliable method)
+        if test -f "$_CONDA_ROOT/etc/fish/conf.d/conda.fish"
             source "$_CONDA_ROOT/etc/fish/conf.d/conda.fish"
         else
-            fish_add_path -p "$_CONDA_ROOT/bin"
+            # Fallback: add to PATH and define minimal conda function
+            fish_add_path -gP "$_CONDA_ROOT/bin"
         end
 
-        # Run the actual conda command with original arguments
+        # Now call the real conda command with original arguments
         conda $argv
+    end
+
+    # Also lazy-load mamba if available
+    if test -f "$CONDA_BASE/bin/mamba"
+        function mamba --description "Lazy-loaded mamba"
+            functions -e mamba
+            if test -f "$_CONDA_ROOT/etc/fish/conf.d/mamba.fish"
+                source "$_CONDA_ROOT/etc/fish/conf.d/mamba.fish"
+            end
+            mamba $argv
+        end
     end
 end
 
