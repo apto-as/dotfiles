@@ -276,7 +276,7 @@ end)
 -- ============================================================================
 
 -- Zellij session selector script (inline Fish)
--- Fixed (Artemis 2025-12-20): Add PATH, dependency checks, and fallback to interactive shell
+-- Fixed (2025-12-21): Use --short flag to avoid ANSI codes and parsing issues
 local zellij_session_selector = [[
   # Ensure Homebrew binaries are in PATH
   fish_add_path -g /opt/homebrew/bin /usr/local/bin
@@ -287,40 +287,30 @@ local zellij_session_selector = [[
     exec fish
   end
 
-  # Check if fzf exists (needed for multi-session selection)
-  set -l has_fzf (command -q fzf; and echo 1; or echo 0)
+  # Get session list (--short returns just names, one per line, no colors)
+  set -l sessions (zellij list-sessions --short 2>/dev/null)
+  set -l session_count (count $sessions)
 
-  set sessions (zellij list-sessions 2>/dev/null | string trim)
-
-  if test -z "$sessions"
+  if test $session_count -eq 0
     # No sessions - create new one
     exec zellij
+  else if test $session_count -eq 1
+    # Only one session - attach directly
+    exec zellij attach $sessions[1]
   else
-    set session_count (echo "$sessions" | wc -l | string trim)
-
-    if test "$session_count" -eq 1
-      # Only one session - attach directly
-      set session_name (echo "$sessions" | head -1 | awk '{print $1}')
-      exec zellij attach "$session_name"
-    else
-      # Multiple sessions
-      if test "$has_fzf" -eq 1
-        # Use fzf to select
-        set selected (echo "$sessions" | fzf --height=40% --reverse --header="Select Zellij Session (or Ctrl+C for new)")
-
-        if test -n "$selected"
-          set session_name (echo "$selected" | awk '{print $1}')
-          exec zellij attach "$session_name"
-        else
-          # User cancelled - create new session
-          exec zellij
-        end
+    # Multiple sessions - use fzf if available
+    if command -q fzf
+      set -l selected (printf '%s\n' $sessions | fzf --height=40% --reverse --header="Select Zellij Session (Ctrl+C for new)")
+      if test -n "$selected"
+        exec zellij attach "$selected"
       else
-        # No fzf - attach to first session
-        echo "[Wezterm] fzf not found. Attaching to first session."
-        set session_name (echo "$sessions" | head -1 | awk '{print $1}')
-        exec zellij attach "$session_name"
+        # User cancelled - create new session
+        exec zellij
       end
+    else
+      # No fzf - attach to first session
+      echo "[Wezterm] fzf not found. Attaching to first session."
+      exec zellij attach $sessions[1]
     end
   end
 
