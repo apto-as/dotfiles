@@ -67,26 +67,35 @@ else if test -f "$HOME/.secure_credentials/api_keys.env"
     # Note: Using secure file-based credentials (1Password CLI is optional)
     # To enable 1Password CLI integration: brew install 1password-cli
 else
-    echo "⚠️  No secure credential storage found." >&2
-    echo "   Option 1: Install 1Password CLI: brew install 1password-cli" >&2
-    echo "   Option 2: Create ~/.secure_credentials/api_keys.env (gitignored)" >&2
+    # No credential storage configured - define placeholder functions
+    # Warning will only appear when user actually tries to load credentials
+    function load_all_credentials
+        echo "⚠️  No secure credential storage configured." >&2
+        echo "   Option 1: Install 1Password CLI: brew install 1password-cli" >&2
+        echo "   Option 2: Create ~/.secure_credentials/api_keys.env" >&2
+        echo "" >&2
+        echo "   After setup, run: load_all_credentials" >&2
+        return 1
+    end
 end
 
-# Helper function to load all credentials at once
-function load_all_credentials
-    if functions -q load_gemini_api_key
-        load_gemini_api_key
-    end
+# Helper function to load all credentials at once (when storage is configured)
+if functions -q load_gemini_api_key; or functions -q load_openai_api_key; or functions -q load_google_credentials
+    function load_all_credentials
+        if functions -q load_gemini_api_key
+            load_gemini_api_key
+        end
 
-    if functions -q load_openai_api_key
-        load_openai_api_key
-    end
+        if functions -q load_openai_api_key
+            load_openai_api_key
+        end
 
-    if functions -q load_google_credentials
-        load_google_credentials
-    end
+        if functions -q load_google_credentials
+            load_google_credentials
+        end
 
-    echo "✅ Credentials loaded securely"
+        echo "✅ Credentials loaded securely"
+    end
 end
 
 # Security: Clear credentials on shell exit
