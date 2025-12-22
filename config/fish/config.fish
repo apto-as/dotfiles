@@ -265,11 +265,38 @@ else
 end
 
 # ============================================================================
+# Dynamic Tool Initialization (Portable - uses $HOME)
+# ============================================================================
+# These tools use dynamic initialization (`| source`) instead of modifying
+# config files. This ensures portability across machines.
+
+# Conda/Miniforge/Miniconda (dynamic init - no `conda init fish` required)
+# Searches common installation locations
+for conda_base in $HOME/miniforge3 $HOME/miniconda3 $HOME/anaconda3 /opt/homebrew/Caskroom/miniforge/base
+    if test -f "$conda_base/bin/conda"
+        eval "$conda_base/bin/conda" "shell.fish" hook $argv | source
+        # Also init mamba if available (suppress errors for version mismatches)
+        if test -f "$conda_base/bin/mamba"
+            eval "$conda_base/bin/mamba" "shell.fish" hook $argv 2>/dev/null | source
+        end
+        break  # Use first found
+    end
+end
+
+# zoxide (smarter cd command)
+if command -q zoxide
+    zoxide init fish | source
+end
+
+# direnv (directory-based environment variables)
+if command -q direnv
+    direnv hook fish | source
+end
+
+# ============================================================================
 # Tool PATH Configuration (Portable - uses $HOME)
 # ============================================================================
 # These paths use $HOME for portability across machines
-# Machine-specific tools (conda, etc.) are configured in:
-#   machines/{MACHINE_TYPE}/fish.local.fish
 
 # Common development tools (if installed)
 # These only add to PATH if the directory exists

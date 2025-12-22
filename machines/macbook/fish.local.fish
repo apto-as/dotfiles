@@ -44,9 +44,10 @@ if type -q exa
 end
 
 # ============================================================================
-# Conda/Miniforge Configuration (Machine-Specific)
+# Conda/Miniforge Notes
 # ============================================================================
-# Conda is initialized via `conda init fish` (managed in ~/.config/fish/config.fish)
+# Conda is initialized dynamically in config.fish (no `conda init fish` required)
+# The initialization searches: ~/miniforge3, ~/miniconda3, ~/anaconda3
 #
 # To enable base environment auto-activation:
 #   conda config --set auto_activate_base true
