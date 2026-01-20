@@ -37,6 +37,17 @@ config.check_for_updates = false
 -- Note: show_update_window is deprecated and removed (as of Wezterm 20250101+)
 
 -- ============================================================================
+-- IME設定（日本語入力最適化）
+-- ============================================================================
+-- Claude Code等のInkベースCLIでIME候補ウィンドウ位置がずれる問題の緩和
+-- 参考: https://github.com/anthropics/claude-code/issues/6342
+
+config.use_ime = true
+config.enable_csi_u_key_encoding = false  -- CSI uエンコーディング無効化（IME互換性向上）
+config.use_dead_keys = false               -- デッドキー無効化
+config.enable_kitty_keyboard = false       -- Kittyキーボードプロトコル無効化（Zellij競合回避）
+
+-- ============================================================================
 -- Draculaテーマ設定（ビルトイン公式版）
 -- ============================================================================
 
