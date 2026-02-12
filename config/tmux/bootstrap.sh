@@ -51,19 +51,13 @@ fi
 # --- Step 2: Clone/update dotfiles ---
 if [ -d "$DOTFILES_DIR/.git" ]; then
     info "Updating dotfiles..."
-    # Stash local changes, then try ff-only, fallback to rebase
-    git -C "$DOTFILES_DIR" stash -q 2>/dev/null || true
-    if git -C "$DOTFILES_DIR" pull --ff-only 2>/dev/null; then
-        ok "Dotfiles updated"
-    elif git -C "$DOTFILES_DIR" pull --rebase 2>/dev/null; then
-        ok "Dotfiles updated (rebased)"
-    else
-        warn "Could not update dotfiles automatically"
-        info "Trying hard reset to origin/main..."
-        git -C "$DOTFILES_DIR" fetch origin 2>/dev/null
-        git -C "$DOTFILES_DIR" reset --hard origin/main 2>/dev/null && ok "Dotfiles reset to latest" || err "Failed to update dotfiles. Run 'cd ~/dotfiles && git pull' manually."
-    fi
-    git -C "$DOTFILES_DIR" stash pop -q 2>/dev/null || true
+    # Drop any local changes and sync to remote (bootstrap should be idempotent)
+    git -C "$DOTFILES_DIR" fetch origin 2>/dev/null
+    git -C "$DOTFILES_DIR" reset --hard origin/main 2>/dev/null && ok "Dotfiles updated" || {
+        warn "Hard reset failed, trying pull..."
+        git -C "$DOTFILES_DIR" checkout -- . 2>/dev/null || true
+        git -C "$DOTFILES_DIR" pull --ff-only 2>/dev/null && ok "Dotfiles updated" || err "Failed to update dotfiles. Run 'cd ~/dotfiles && git pull' manually."
+    }
 else
     info "Cloning dotfiles..."
     git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
