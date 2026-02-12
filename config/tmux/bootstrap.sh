@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================================
-# tmux Bootstrap - One-liner Setup
+# tmux Bootstrap - One-liner Setup (with Zellij migration)
 # Usage: curl -fsSL https://raw.githubusercontent.com/apto-as/dotfiles/main/config/tmux/bootstrap.sh | bash
 # ============================================================================
 set -euo pipefail
@@ -8,6 +8,7 @@ set -euo pipefail
 DOTFILES_REPO="https://github.com/apto-as/dotfiles.git"
 DOTFILES_DIR="$HOME/dotfiles"
 TMUX_CONF_DIR="$HOME/.config/tmux"
+WEZTERM_CONF_DIR="$HOME/.config/wezterm"
 TPM_DIR="$HOME/.tmux/plugins/tpm"
 
 info()  { printf "\033[34m[INFO]\033[0m  %s\n" "$1"; }
@@ -17,7 +18,7 @@ err()   { printf "\033[31m[ERR]\033[0m   %s\n" "$1"; }
 
 # --- Step 0: Disable Zellij auto-start (migration) ---
 if [ -n "${ZELLIJ:-}" ]; then
-    warn "Running inside Zellij. Disabling Zellij auto-start for tmux migration."
+    warn "Running inside Zellij. Migrating to tmux..."
 fi
 
 ZELLIJ_CONF_DIR="$HOME/.config/zellij"
@@ -50,8 +51,19 @@ fi
 # --- Step 2: Clone/update dotfiles ---
 if [ -d "$DOTFILES_DIR/.git" ]; then
     info "Updating dotfiles..."
-    git -C "$DOTFILES_DIR" pull --ff-only 2>/dev/null || warn "Could not update dotfiles (non-fast-forward)"
-    ok "Dotfiles up to date"
+    # Stash local changes, then try ff-only, fallback to rebase
+    git -C "$DOTFILES_DIR" stash -q 2>/dev/null || true
+    if git -C "$DOTFILES_DIR" pull --ff-only 2>/dev/null; then
+        ok "Dotfiles updated"
+    elif git -C "$DOTFILES_DIR" pull --rebase 2>/dev/null; then
+        ok "Dotfiles updated (rebased)"
+    else
+        warn "Could not update dotfiles automatically"
+        info "Trying hard reset to origin/main..."
+        git -C "$DOTFILES_DIR" fetch origin 2>/dev/null
+        git -C "$DOTFILES_DIR" reset --hard origin/main 2>/dev/null && ok "Dotfiles reset to latest" || err "Failed to update dotfiles. Run 'cd ~/dotfiles && git pull' manually."
+    fi
+    git -C "$DOTFILES_DIR" stash pop -q 2>/dev/null || true
 else
     info "Cloning dotfiles..."
     git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
@@ -70,6 +82,22 @@ elif [ -d "$TMUX_CONF_DIR" ]; then
 else
     ln -sf "$DOTFILES_DIR/config/tmux" "$TMUX_CONF_DIR"
     ok "tmux config symlinked"
+fi
+
+# --- Step 3.5: Ensure WezTerm config is symlinked ---
+if [ -d "$DOTFILES_DIR/config/wezterm" ]; then
+    mkdir -p "$(dirname "$WEZTERM_CONF_DIR")"
+    if [ -L "$WEZTERM_CONF_DIR" ]; then
+        ok "WezTerm config symlink already exists"
+    elif [ -d "$WEZTERM_CONF_DIR" ]; then
+        warn "Backing up existing WezTerm config"
+        mv "$WEZTERM_CONF_DIR" "${WEZTERM_CONF_DIR}.bak.$(date +%Y%m%d%H%M%S)"
+        ln -sf "$DOTFILES_DIR/config/wezterm" "$WEZTERM_CONF_DIR"
+        ok "WezTerm config symlinked (old config backed up)"
+    else
+        ln -sf "$DOTFILES_DIR/config/wezterm" "$WEZTERM_CONF_DIR"
+        ok "WezTerm config symlinked"
+    fi
 fi
 
 # --- Step 4: Install TPM ---
@@ -101,7 +129,6 @@ echo "  Prefix key:  Ctrl+g"
 echo "  Layouts:     tcc (Claude Code) | tdev (dev) | tmon (monitor)"
 echo ""
 if [ -n "${ZELLIJ:-}" ]; then
-    echo "  ⚠  Restart WezTerm to switch from Zellij to tmux."
-    echo "     (Zellij config has been backed up, tmux will auto-start)"
+    warn "Restart WezTerm to switch from Zellij to tmux."
+    echo "       (Zellij config backed up, WezTerm now configured for tmux)"
 fi
-echo ""
