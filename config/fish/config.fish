@@ -20,6 +20,9 @@ set -gx PYTORCH_ENABLE_MPS_FALLBACK 1
 fish_add_path -p $HOME/.local/bin
 fish_add_path -p $HOME/bin
 
+# TMWS binaries (Trinitas Multi-Agent System)
+fish_add_path -p $HOME/.tmws/bin
+
 # Rust toolchain
 fish_add_path -a $HOME/.cargo/bin
 
@@ -69,9 +72,10 @@ alias cc-unsafe "claude --dangerously-skip-permissions"
 # Safe Claude Code alias (recommended for normal use)
 alias cc "claude"
 
-# Zellij quick launch aliases (Trinitas 2025-12-18)
-alias zcc "zellij --layout claude-code"  # Claude Code development layout
-alias zdev "zellij --layout dev"          # Standard development layout
+# tmux layout aliases
+alias tcc "$HOME/.config/tmux/layouts/claude-code.sh"  # Claude Code development layout
+alias tdev "$HOME/.config/tmux/layouts/dev.sh"          # Standard development layout
+alias tmon "$HOME/.config/tmux/layouts/monitoring.sh"   # Monitoring dashboard
 
 #-----------
 # eza config and function
@@ -403,3 +407,8 @@ alias oc='opencode-context'
 if status is-interactive; and not set -q FISH_STARTUP_QUIET
     echo "✓ Open Code v2.2.1 context management loaded (profile: $OPENCODE_CONTEXT_PROFILE)"
 end
+
+# Added by LM Studio CLI (lms)
+set -gx PATH $PATH /Users/apto-as/.cache/lm-studio/bin
+# End of LM Studio CLI section
+

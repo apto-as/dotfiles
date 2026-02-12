@@ -24,6 +24,7 @@ source "${INSTALLERS_DIR}/homebrew.sh"
 source "${INSTALLERS_DIR}/fonts.sh"
 source "${INSTALLERS_DIR}/wezterm.sh"
 source "${INSTALLERS_DIR}/zellij.sh"
+source "${INSTALLERS_DIR}/tmux.sh"
 source "${INSTALLERS_DIR}/neovim.sh"
 source "${INSTALLERS_DIR}/fish.sh"
 source "${INSTALLERS_DIR}/tools.sh"
@@ -89,6 +90,9 @@ main() {
     install_zellij &
     local zellij_pid=$!
 
+    install_tmux &
+    local tmux_pid=$!
+
     install_neovim &
     local neovim_pid=$!
 
@@ -102,6 +106,7 @@ main() {
     wait $fonts_pid && log_success "Fonts installed" || log_warn "Fonts installation had issues"
     wait $wezterm_pid && log_success "Wezterm installed" || log_warn "Wezterm installation had issues"
     wait $zellij_pid && log_success "Zellij installed" || log_warn "Zellij installation had issues"
+    wait $tmux_pid && log_success "tmux installed" || log_warn "tmux installation had issues"
     wait $neovim_pid && log_success "Neovim installed" || log_warn "Neovim installation had issues"
     wait $fish_pid && log_success "Fish shell installed" || log_warn "Fish installation had issues"
     wait $tools_pid && log_success "Tools installed" || log_warn "Tools installation had issues"
@@ -152,6 +157,7 @@ main() {
     setup_symlinks
     setup_machine_specific_configs
     configure_zellij  # Initialize Zellij directories
+    configure_tmux    # Initialize tmux directories and TPM
     configure_fish    # Setup Fish shell configurations
     add_fish_to_shells
     echo ""
@@ -180,6 +186,7 @@ backup_existing_configs() {
         "${HOME}/.config/nvim"
         "${HOME}/.config/wezterm"
         "${HOME}/.config/zellij"
+        "${HOME}/.config/tmux"
     )
 
     backup_batch "${configs[@]}"
@@ -191,6 +198,7 @@ setup_symlinks() {
         "${DOTFILES_DIR}/config/nvim:${HOME}/.config/nvim"
         "${DOTFILES_DIR}/config/wezterm:${HOME}/.config/wezterm"
         "${DOTFILES_DIR}/config/zellij:${HOME}/.config/zellij"
+        "${DOTFILES_DIR}/config/tmux:${HOME}/.config/tmux"
     )
 
     create_symlinks "${symlink_mappings[@]}"
@@ -227,6 +235,7 @@ verify_installation() {
     # Verify core commands
     verify_wezterm || ((errors++))
     verify_zellij || ((errors++))
+    verify_tmux || ((errors++))
     verify_neovim || ((errors++))
     verify_fish || ((errors++))
     verify_fonts || ((errors++))
@@ -249,6 +258,7 @@ verify_installation() {
         "${DOTFILES_DIR}/config/nvim:${HOME}/.config/nvim"
         "${DOTFILES_DIR}/config/wezterm:${HOME}/.config/wezterm"
         "${DOTFILES_DIR}/config/zellij:${HOME}/.config/zellij"
+        "${DOTFILES_DIR}/config/tmux:${HOME}/.config/tmux"
     )
 
     verify_symlinks "${symlink_mappings[@]}" || ((errors++))
@@ -256,6 +266,12 @@ verify_installation() {
     # Verify Zellij security
     verify_zellij_security || {
         log_error "Zellij security verification failed"
+        ((errors++))
+    }
+
+    # Verify tmux security
+    verify_tmux_security || {
+        log_error "tmux security verification failed"
         ((errors++))
     }
 

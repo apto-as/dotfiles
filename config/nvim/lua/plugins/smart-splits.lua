@@ -1,6 +1,6 @@
 -- ============================================================================
--- smart-splits.nvim - Seamless Neovim/Zellij Pane Navigation
--- Purpose: Navigate between Neovim splits and Zellij panes with the same keys
+-- smart-splits.nvim - Seamless Neovim/tmux Pane Navigation
+-- Purpose: Navigate between Neovim splits and tmux panes with the same keys
 -- Keybindings: Ctrl+h/j/k/l for navigation, Alt+h/j/k/l for resizing
 -- ============================================================================
 
@@ -9,8 +9,8 @@ return {
     "mrjones2014/smart-splits.nvim",
     lazy = false,  -- Load immediately for keybindings
     opts = {
-      -- Zellij multiplexer integration
-      multiplexer_integration = "zellij",
+      -- tmux multiplexer integration
+      multiplexer_integration = "tmux",
 
       -- Ignore buffers matching these filetypes when navigating
       ignored_buftypes = {

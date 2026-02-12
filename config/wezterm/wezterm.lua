@@ -272,56 +272,55 @@ wezterm.on('format-tab-title', function(tab, tabs, panes, config, hover, max_wid
 end)
 
 -- ============================================================================
--- Zellij Integration (Terminal Multiplexer)
+-- tmux Integration (Terminal Multiplexer)
 -- ============================================================================
--- Auto-start Zellij on Wezterm launch with session selection
+-- Auto-start tmux on Wezterm launch with session selection
 --
 -- Features:
 --   - Session selection via fzf (if multiple sessions exist)
 --   - Auto-attach if only one session exists
 --   - Create new session if no sessions exist
 --
--- Control via environment variable: WEZTERM_ZELLIJ_AUTO_START
+-- Control via environment variable: WEZTERM_TMUX_AUTO_START
 --   - "true" or unset: Enable auto-start with session selection (default)
 --   - "false": Disable auto-start
 -- ============================================================================
 
--- Zellij session selector script (inline Fish)
--- Fixed (2025-12-21): Use --short flag to avoid ANSI codes and parsing issues
-local zellij_session_selector = [[
+-- tmux session selector script (inline Fish)
+local tmux_session_selector = [[
   # Ensure Homebrew binaries are in PATH
   fish_add_path -g /opt/homebrew/bin /usr/local/bin
 
-  # Check if zellij exists
-  if not command -q zellij
-    echo "[Wezterm] zellij not found in PATH. Starting plain Fish shell."
+  # Check if tmux exists
+  if not command -q tmux
+    echo "[Wezterm] tmux not found in PATH. Starting plain Fish shell."
     exec fish
   end
 
-  # Get session list (--short returns just names, one per line, no colors)
-  set -l sessions (zellij list-sessions --short 2>/dev/null)
+  # Get session list
+  set -l sessions (tmux list-sessions -F '#{session_name}' 2>/dev/null)
   set -l session_count (count $sessions)
 
   if test $session_count -eq 0
     # No sessions - create new one
-    exec zellij
+    exec tmux new-session
   else if test $session_count -eq 1
     # Only one session - attach directly
-    exec zellij attach $sessions[1]
+    exec tmux attach -t $sessions[1]
   else
     # Multiple sessions - use fzf if available
     if command -q fzf
-      set -l selected (printf '%s\n' $sessions | fzf --height=40% --reverse --header="Select Zellij Session (Ctrl+C for new)")
+      set -l selected (printf '%s\n' $sessions | fzf --height=40% --reverse --header="Select tmux Session (Ctrl+C for new)")
       if test -n "$selected"
-        exec zellij attach "$selected"
+        exec tmux attach -t "$selected"
       else
         # User cancelled - create new session
-        exec zellij
+        exec tmux new-session
       end
     else
       # No fzf - attach to first session
       echo "[Wezterm] fzf not found. Attaching to first session."
-      exec zellij attach $sessions[1]
+      exec tmux attach -t $sessions[1]
     end
   end
 
@@ -329,25 +328,25 @@ local zellij_session_selector = [[
   exec fish
 ]]
 
--- Check if Zellij auto-start is enabled (default: true - 2025-12-20)
-local zellij_auto_start = os.getenv('WEZTERM_ZELLIJ_AUTO_START')
-if zellij_auto_start == nil then
-  zellij_auto_start = 'true'  -- Default: enabled with session selection
+-- Check if tmux auto-start is enabled (default: true)
+local tmux_auto_start = os.getenv('WEZTERM_TMUX_AUTO_START')
+if tmux_auto_start == nil then
+  tmux_auto_start = 'true'  -- Default: enabled with session selection
 end
 
 -- Only auto-start if:
 -- 1. Auto-start is enabled
--- 2. Not already inside a Zellij session (prevent nested sessions)
-if zellij_auto_start:lower() ~= 'false' and os.getenv('ZELLIJ') == nil then
+-- 2. Not already inside a tmux session (prevent nested sessions)
+if tmux_auto_start:lower() ~= 'false' and os.getenv('TMUX') == nil then
   -- Launch Fish with session selector script
-  config.default_prog = { '/opt/homebrew/bin/fish', '-l', '-c', zellij_session_selector }
+  config.default_prog = { '/opt/homebrew/bin/fish', '-l', '-c', tmux_session_selector }
 
-  wezterm.log_info('Zellij auto-start enabled with session selection.')
+  wezterm.log_info('tmux auto-start enabled with session selection.')
 else
-  if os.getenv('ZELLIJ') then
-    wezterm.log_info('Already inside Zellij session. Skipping auto-start.')
+  if os.getenv('TMUX') then
+    wezterm.log_info('Already inside tmux session. Skipping auto-start.')
   else
-    wezterm.log_info('Zellij auto-start disabled via WEZTERM_ZELLIJ_AUTO_START.')
+    wezterm.log_info('tmux auto-start disabled via WEZTERM_TMUX_AUTO_START.')
   end
 end
 
@@ -369,14 +368,12 @@ config.keys = {
     action = wezterm.action.SpawnTab("CurrentPaneDomain"),
   },
 
-  -- Ctrl+Alt+Z: Quick Zellij attach/launch
-  -- CHANGED from Ctrl+z to Ctrl+Alt+z (Athena 2025-12-18): Avoid conflict with Neovim Undo
+  -- Ctrl+Alt+T: Quick tmux attach/launch
   {
-    key = 'z',
+    key = 't',
     mods = 'CTRL|ALT',
     action = wezterm.action.SpawnCommandInNewTab {
-      -- CRITICAL FIX (Artemis 2025-11-17): Use absolute path for keybinding
-      args = { '/opt/homebrew/bin/zellij', 'attach', '--create' },
+      args = { '/opt/homebrew/bin/tmux', 'new-session', '-A', '-s', 'main' },
     },
   },
 
