@@ -15,6 +15,18 @@ ok()    { printf "\033[32m[OK]\033[0m    %s\n" "$1"; }
 warn()  { printf "\033[33m[WARN]\033[0m  %s\n" "$1"; }
 err()   { printf "\033[31m[ERR]\033[0m   %s\n" "$1"; }
 
+# --- Step 0: Disable Zellij auto-start (migration) ---
+if [ -n "${ZELLIJ:-}" ]; then
+    warn "Running inside Zellij. Disabling Zellij auto-start for tmux migration."
+fi
+
+ZELLIJ_CONF_DIR="$HOME/.config/zellij"
+if [ -d "$ZELLIJ_CONF_DIR" ] || [ -L "$ZELLIJ_CONF_DIR" ]; then
+    info "Zellij config found. Backing up and removing..."
+    mv "$ZELLIJ_CONF_DIR" "${ZELLIJ_CONF_DIR}.bak.$(date +%Y%m%d%H%M%S)"
+    ok "Zellij config backed up (auto-start disabled)"
+fi
+
 # --- Step 1: Install tmux ---
 if command -v tmux &>/dev/null; then
     ok "tmux already installed ($(tmux -V))"
@@ -87,4 +99,9 @@ echo ""
 echo "  Start tmux:  tmux"
 echo "  Prefix key:  Ctrl+g"
 echo "  Layouts:     tcc (Claude Code) | tdev (dev) | tmon (monitor)"
+echo ""
+if [ -n "${ZELLIJ:-}" ]; then
+    echo "  ⚠  Restart WezTerm to switch from Zellij to tmux."
+    echo "     (Zellij config has been backed up, tmux will auto-start)"
+fi
 echo ""

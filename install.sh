@@ -23,7 +23,6 @@ source "${LIB_DIR}/pkg.sh"
 source "${INSTALLERS_DIR}/homebrew.sh"
 source "${INSTALLERS_DIR}/fonts.sh"
 source "${INSTALLERS_DIR}/wezterm.sh"
-source "${INSTALLERS_DIR}/zellij.sh"
 source "${INSTALLERS_DIR}/tmux.sh"
 source "${INSTALLERS_DIR}/neovim.sh"
 source "${INSTALLERS_DIR}/fish.sh"
@@ -87,9 +86,6 @@ main() {
     install_wezterm &
     local wezterm_pid=$!
 
-    install_zellij &
-    local zellij_pid=$!
-
     install_tmux &
     local tmux_pid=$!
 
@@ -105,7 +101,6 @@ main() {
     # Wait for core tools
     wait $fonts_pid && log_success "Fonts installed" || log_warn "Fonts installation had issues"
     wait $wezterm_pid && log_success "Wezterm installed" || log_warn "Wezterm installation had issues"
-    wait $zellij_pid && log_success "Zellij installed" || log_warn "Zellij installation had issues"
     wait $tmux_pid && log_success "tmux installed" || log_warn "tmux installation had issues"
     wait $neovim_pid && log_success "Neovim installed" || log_warn "Neovim installation had issues"
     wait $fish_pid && log_success "Fish shell installed" || log_warn "Fish installation had issues"
@@ -156,7 +151,6 @@ main() {
     log_info "[Phase 7/8] Setup Configurations"
     setup_symlinks
     setup_machine_specific_configs
-    configure_zellij  # Initialize Zellij directories
     configure_tmux    # Initialize tmux directories and TPM
     configure_fish    # Setup Fish shell configurations
     add_fish_to_shells
@@ -185,7 +179,6 @@ backup_existing_configs() {
     local -a configs=(
         "${HOME}/.config/nvim"
         "${HOME}/.config/wezterm"
-        "${HOME}/.config/zellij"
         "${HOME}/.config/tmux"
     )
 
@@ -197,7 +190,6 @@ setup_symlinks() {
     local -a symlink_mappings=(
         "${DOTFILES_DIR}/config/nvim:${HOME}/.config/nvim"
         "${DOTFILES_DIR}/config/wezterm:${HOME}/.config/wezterm"
-        "${DOTFILES_DIR}/config/zellij:${HOME}/.config/zellij"
         "${DOTFILES_DIR}/config/tmux:${HOME}/.config/tmux"
     )
 
@@ -234,7 +226,6 @@ verify_installation() {
 
     # Verify core commands
     verify_wezterm || ((errors++))
-    verify_zellij || ((errors++))
     verify_tmux || ((errors++))
     verify_neovim || ((errors++))
     verify_fish || ((errors++))
@@ -257,17 +248,10 @@ verify_installation() {
     local -a symlink_mappings=(
         "${DOTFILES_DIR}/config/nvim:${HOME}/.config/nvim"
         "${DOTFILES_DIR}/config/wezterm:${HOME}/.config/wezterm"
-        "${DOTFILES_DIR}/config/zellij:${HOME}/.config/zellij"
         "${DOTFILES_DIR}/config/tmux:${HOME}/.config/tmux"
     )
 
     verify_symlinks "${symlink_mappings[@]}" || ((errors++))
-
-    # Verify Zellij security
-    verify_zellij_security || {
-        log_error "Zellij security verification failed"
-        ((errors++))
-    }
 
     # Verify tmux security
     verify_tmux_security || {
@@ -295,7 +279,7 @@ show_next_steps() {
     echo "  2. (Optional) Set Fish as default shell: chsh -s \$(which fish)"
     echo "  3. Configure API keys in ~/.secure_credentials/api_keys.env (see example file)"
     echo "  4. Open Wezterm to see the new configuration"
-    echo "  5. Launch Zellij: zellij (or press Ctrl+a z in Wezterm)"
+    echo "  5. tmux starts automatically with Wezterm (prefix: Ctrl+g)"
     echo "  6. Open Neovim to trigger LazyVim bootstrap: nvim"
     echo "  7. (Optional) Start Docker Desktop (macOS) or enable Docker service (Linux)"
     echo "  8. (Optional) Configure Claude Code: claude config"
@@ -304,7 +288,7 @@ show_next_steps() {
     echo "  • Dotfiles: ${DOTFILES_DIR}"
     echo "  • Neovim: ~/.config/nvim -> ${DOTFILES_DIR}/config/nvim"
     echo "  • Wezterm: ~/.config/wezterm -> ${DOTFILES_DIR}/config/wezterm"
-    echo "  • Zellij: ~/.config/zellij -> ${DOTFILES_DIR}/config/zellij"
+    echo "  • tmux: ~/.config/tmux -> ${DOTFILES_DIR}/config/tmux"
     echo "  • Fish: ~/.config/fish/config.fish -> ${DOTFILES_DIR}/config/fish/config.fish"
     echo "  • Claude Code: ~/.claude/"
     echo "  • Open Code: ~/.config/opencode/"
@@ -321,7 +305,7 @@ show_next_steps() {
     echo "  • Update dotfiles: ${DOTFILES_DIR}/update.sh"
     echo "  • List backups: ${DOTFILES_DIR}/install.sh --list-backups"
     echo "  • Rollback: ${DOTFILES_DIR}/install.sh --rollback"
-    echo "  • Launch Zellij: zellij"
+    echo "  • Layouts: tcc (Claude Code) | tdev (dev) | tmon (monitor)"
     echo "  • Start Claude Code: claude"
     echo "  • Activate conda: conda activate <env>"
     echo "  • Node version: nvm use <version>"

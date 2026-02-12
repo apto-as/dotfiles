@@ -7,7 +7,7 @@
 --   - Dracula Theme (Official)
 --   - Custom background image with HSB adjustment
 --   - PlemolJP Console NF font (size 14)
---   - Zellij auto-start with session selection (fzf)
+--   - tmux auto-start with session selection (fzf)
 --   - Window size/position memory (restored on restart)
 --   - GPU acceleration (WebGpu)
 --   - Performance optimizations
@@ -45,7 +45,7 @@ config.check_for_updates = false
 config.use_ime = true
 config.enable_csi_u_key_encoding = false  -- CSI uエンコーディング無効化（IME互換性向上）
 config.use_dead_keys = false               -- デッドキー無効化
-config.enable_kitty_keyboard = false       -- Kittyキーボードプロトコル無効化（Zellij競合回避）
+config.enable_kitty_keyboard = false       -- Kittyキーボードプロトコル無効化（互換性向上）
 
 -- ============================================================================
 -- Draculaテーマ設定（ビルトイン公式版）
@@ -178,17 +178,8 @@ config.hide_tab_bar_if_only_one_tab = true
 -- タブの最大幅
 config.tab_max_width = 32
 
--- ============================================================================
--- Zellij統合最適化
--- ============================================================================
-
--- スクロールバー無効化（Zellijのスクロール機能を使用）
+-- スクロールバー無効化（tmuxのスクロール機能を使用）
 config.enable_scroll_bar = false
-
--- ============================================================================
--- キーバインド設定 (Note: Full keybindings defined below in Zellij section)
--- ============================================================================
--- Keybindings are consolidated in the "Keybindings for Zellij Integration and Claude Code" section
 
 -- ============================================================================
 -- ベル設定

@@ -191,7 +191,7 @@ if not set -q MACHINE_TYPE
                     set -gx MACHINE_TYPE "unknown"
             end
     end
-    # Only show auto-detection message in interactive mode (not in scripts/Zellij startup)
+    # Only show auto-detection message in interactive mode (not in scripts/tmux startup)
     if status is-interactive; and not set -q FISH_STARTUP_QUIET
         echo "ℹ️  Auto-detected MACHINE_TYPE: $MACHINE_TYPE" >&2
     end
@@ -207,7 +207,7 @@ if test -f $MACHINE_CONFIG
     end
 else
     # Only show warning in truly interactive sessions (first terminal window)
-    if status is-interactive; and not set -q FISH_STARTUP_QUIET; and not set -q ZELLIJ
+    if status is-interactive; and not set -q FISH_STARTUP_QUIET; and not set -q TMUX
         echo "⚠️  Machine config not found: $MACHINE_CONFIG" >&2
         echo "   Create it with: touch ~/dotfiles/machines/$MACHINE_TYPE/fish.local.fish" >&2
     end
