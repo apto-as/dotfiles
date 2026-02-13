@@ -20,7 +20,8 @@ set -gx PYTORCH_ENABLE_MPS_FALLBACK 1
 fish_add_path -p $HOME/.local/bin
 fish_add_path -p $HOME/bin
 
-# TMWS binaries (Trinitas Multi-Agent System)
+# TMWS (Trinitas Multi-Agent System)
+set -gx TMWS_HOME $HOME/.tmws
 fish_add_path -p $HOME/.tmws/bin
 
 # Rust toolchain
