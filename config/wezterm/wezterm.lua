@@ -368,19 +368,20 @@ config.keys = {
     },
   },
 
-  -- Shift+Enter: Send newline character for Claude Code multi-line input
-  -- FIX (2025-12-20): Alt+Enter conflicts with Wezterm, use Shift+Enter instead
+  -- Shift+Enter: Send CSI u encoded Shift+Enter for Claude Code multi-line input
+  -- Uses CSI u sequence (\x1b[13;2u) so tmux extended-keys can pass it through
+  -- Note: Global CSI u is OFF (IME compat), this is a targeted override
   {
     key = 'Enter',
     mods = 'SHIFT',
-    action = wezterm.action.SendString '\n',
+    action = wezterm.action.SendString '\x1b[13;2u',
   },
 
-  -- Alt+Enter: Also map to newline for compatibility
+  -- Alt+Enter: Send CSI u encoded Alt+Enter for compatibility
   {
     key = 'Enter',
     mods = 'ALT',
-    action = wezterm.action.SendString '\n',
+    action = wezterm.action.SendString '\x1b[13;3u',
   },
 }
 
