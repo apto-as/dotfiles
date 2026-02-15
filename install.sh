@@ -279,7 +279,7 @@ show_next_steps() {
     echo "  2. (Optional) Set Fish as default shell: chsh -s \$(which fish)"
     echo "  3. Configure API keys in ~/.secure_credentials/api_keys.env (see example file)"
     echo "  4. Open Wezterm to see the new configuration"
-    echo "  5. tmux starts automatically with Wezterm (prefix: Ctrl+g)"
+    echo "  5. tmux starts automatically with Wezterm (prefix: Ctrl+q)"
     echo "  6. Open Neovim to trigger LazyVim bootstrap: nvim"
     echo "  7. (Optional) Start Docker Desktop (macOS) or enable Docker service (Linux)"
     echo "  8. (Optional) Configure Claude Code: claude config"

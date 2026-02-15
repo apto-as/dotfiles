@@ -112,14 +112,14 @@ ok "Directories created with secure permissions"
 
 # --- Step 6: Install TPM plugins (headless) ---
 info "Installing tmux plugins..."
-"$TPM_DIR/bin/install_plugins" 2>/dev/null || warn "Plugin install requires tmux server (run 'Ctrl+g → I' inside tmux)"
+"$TPM_DIR/bin/install_plugins" 2>/dev/null || warn "Plugin install requires tmux server (run 'Ctrl+q → I' inside tmux)"
 
 # --- Done ---
 echo ""
 printf "\033[32m✓ tmux setup complete!\033[0m\n"
 echo ""
 echo "  Start tmux:  tmux"
-echo "  Prefix key:  Ctrl+g"
+echo "  Prefix key:  Ctrl+q"
 echo "  Layouts:     tcc (Claude Code) | tdev (dev) | tmon (monitor)"
 echo ""
 if [ -n "${ZELLIJ:-}" ]; then
