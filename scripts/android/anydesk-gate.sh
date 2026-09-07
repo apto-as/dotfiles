@@ -106,6 +106,34 @@ m=re.search(r'<node[^>]*dialog_accept_msg[^>]*>',d)
 t=re.search(r'text=\"([^\"]*)\"',m.group(0)) if m else None
 print(t.group(1) if t else '')")"
       if printf '%s' "$MSG" | grep -qF "$ALLOW_ID"; then
+        # ★承諾の前に、権限プロファイルを「フルアクセス」にする
+        #   （「以前のセッション」だと 見るだけ＝操作できない状態を引き継ぐ）
+        PB="$(printf '%s' "$X" | python3 -c "
+import re,sys
+d=sys.stdin.read()
+for n in re.finditer(r'<node[^>]*>',d):
+    s=n.group(0)
+    m=re.search(r'text=\"([^\"]*)\"',s)
+    if m and 'フルアクセス' in m.group(1):
+        b=re.search(r'bounds=\"\[(-?\d+),(-?\d+)\]\[(-?\d+),(-?\d+)\]\"',s)
+        if b:
+            x1,y1,x2,y2=map(int,b.groups()); print((x1+x2)//2,(y1+y2)//2); break")"
+        if [ -n "$PB" ]; then
+          adb shell input -d 0 tap $PB; sleep 1; say "権限プロファイルを フルアクセス に"
+          X="$(ui)"
+        else
+          PL="$(printf '%s' "$X" | python3 -c "
+import re,sys
+d=sys.stdin.read()
+out=[]
+for n in re.finditer(r'<node[^>]*>',d):
+    s=n.group(0)
+    if 'permission_profile' in s or 'dialog_accept_profiles' in s:
+        m=re.search(r'text=\"([^\"]*)\"',s)
+        if m and m.group(1): out.append(m.group(1))
+print(' | '.join(out) if out else '(プロファイルの項目が 1 つも無い)')")"
+          say "△ フルアクセスが見当たらない ⇒ 実際に在った項目: $PL"
+        fi
         B="$(printf '%s' "$X" | center 'resource-id="android:id/button1"')"
         [ -z "$B" ] && B="$(printf '%s' "$X" | center 'button1')"
         if [ -n "$B" ]; then adb shell input -d 0 tap $B; say "★承諾（許可した相手）"; sleep 2; fi
@@ -175,12 +203,10 @@ if m:
     else
       if [ "$LAST" = "connected" ]; then
         say "接続が切れた（待ち受けへ戻る）"; LAST=""
-        # ★自分で解除したのなら、元のロック状態へ戻す
-        if [ "${WAS_LOCKED:-0}" = "1" ]; then
-          adb shell input -d 0 keyevent KEYCODE_SLEEP >/dev/null 2>&1; sleep 3
-          if locked; then say "★ロックし直した（元の状態へ戻した）"; else say "✗ ロックし直せなかった"; fi
-          WAS_LOCKED=0
-        fi
+        # ★接続が終わったら 必ずロックする（誰が解除したかに関わらず）
+        adb shell input -d 0 keyevent KEYCODE_SLEEP >/dev/null 2>&1; sleep 3
+        if locked; then say "★ロックした（接続終了）"; else say "✗ ロックできなかった"; fi
+        WAS_LOCKED=0
       fi
     fi
   fi
