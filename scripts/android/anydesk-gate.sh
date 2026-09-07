@@ -11,21 +11,36 @@ LOG="${ANYDESK_GATE_LOG:-$HOME/.android-lab/gate.log}"
 mkdir -p "$(dirname "$LOG")"
 say(){ echo "$(date '+%H:%M:%S') $*" | tee -a "$LOG"; }
 
+# ★どの端末を掴むか。★無線を優先する（USB を抜いても続くように）
+SERIAL=""
+pick_serial(){
+  local w u
+  w="$(command adb devices 2>/dev/null | tr -d '\r' | awk '/^[0-9.]+:[0-9]+[[:space:]]+device$/{print $1; exit}')"
+  u="$(command adb devices 2>/dev/null | tr -d '\r' | awk '/[[:space:]]device$/{print $1}' | grep -v ':' | head -1)"
+  local new="${w:-$u}"
+  if [ "$new" != "$SERIAL" ]; then
+    SERIAL="$new"
+    [ -n "$SERIAL" ] && say "掴む端末: $(printf '%s' "$SERIAL" | sed 's/:[0-9]*$/:<ポート>/')" || say "✗ 掴める端末が無い"
+  fi
+}
+A(){ command adb ${SERIAL:+-s "$SERIAL"} "$@"; }
+alive(){ [ -n "$SERIAL" ] && command adb devices 2>/dev/null | tr -d '\r' | grep -q "^$SERIAL[[:space:]]*device$"; }
+
 # ★ロック解除 — パターンは repo に書かない。~/.android-lab/pattern（chmod 600）から読む
 PATTERN_FILE="${ANDROID_PATTERN_FILE:-$HOME/.android-lab/pattern}"
-locked(){ adb shell dumpsys window 2>/dev/null | tr -d '\r' | grep -q 'mDreamingLockscreen=true'; }
+locked(){ A shell dumpsys window 2>/dev/null | tr -d '\r' | grep -q 'mDreamingLockscreen=true'; }
 # ★AnyDesk の操作権限（AD1 のアクセシビリティ）が生きているか。落ちていたら戻す。
 #   これが無いと AnyDesk は「見るだけ」になる（公式: Android は既定で遠隔入力を許さない）。
 #   2026-09-07 に実際に落ちていて、剛さまが操作できなくなった。原因は未特定。
 A11Y_SVC="com.anydesk.adcontrol.ad1/com.anydesk.adcontrol.AccService"
 ensure_a11y(){
-  adb shell dumpsys accessibility 2>/dev/null | tr -d '\r' \
+  A shell dumpsys accessibility 2>/dev/null | tr -d '\r' \
     | grep -q "Bound services:{Service\[label=AnyDesk" && return 0
   say "★AnyDesk の操作権限が落ちていた ⇒ 戻す"
-  adb shell settings put secure enabled_accessibility_services "$A11Y_SVC" >/dev/null 2>&1
-  adb shell settings put secure accessibility_enabled 1 >/dev/null 2>&1
+  A shell settings put secure enabled_accessibility_services "$A11Y_SVC" >/dev/null 2>&1
+  A shell settings put secure accessibility_enabled 1 >/dev/null 2>&1
   sleep 2
-  if adb shell dumpsys accessibility 2>/dev/null | tr -d '\r' | grep -q "Bound services:{Service\[label=AnyDesk"; then
+  if A shell dumpsys accessibility 2>/dev/null | tr -d '\r' | grep -q "Bound services:{Service\[label=AnyDesk"; then
     say "★操作権限を戻した（束縛を確認）"
   else
     say "✗ 操作権限を戻せなかった"
@@ -34,19 +49,19 @@ ensure_a11y(){
 
 # ★接続中か ＝ 画面を投影しているか（画面に何が出ているかに依存しない）
 projecting(){
-  adb shell dumpsys media_projection 2>/dev/null | tr -d '\r' \
+  A shell dumpsys media_projection 2>/dev/null | tr -d '\r' \
     | awk '/Media Projection:/{f=1;next} f{print;exit}' | grep -q 'null' && return 1
   return 0
 }
 unlock(){
   [ -s "$PATTERN_FILE" ] || { say "✗ 解除できない — パターン未設定"; return 1; }
-  adb shell input -d 0 keyevent KEYCODE_WAKEUP >/dev/null 2>&1; sleep 2
+  A shell input -d 0 keyevent KEYCODE_WAKEUP >/dev/null 2>&1; sleep 2
   # ★Samsung の「誤操作を防止」が手前に出ていたら、まず それを払う
   if ui | grep -q 'unintentional'; then
     say "誤操作防止の画面 ⇒ 先に払う"
-    adb shell input -d 0 swipe 540 1760 540 700 300 >/dev/null 2>&1; sleep 2
+    A shell input -d 0 swipe 540 1760 540 700 300 >/dev/null 2>&1; sleep 2
   fi
-  adb shell input -d 0 swipe 540 1900 540 800 250 >/dev/null 2>&1
+  A shell input -d 0 swipe 540 1900 540 800 250 >/dev/null 2>&1
   # ★格子は遷移中に取れないことがある ⇒ 見つかるまで数回 待つ
   local CMD UIX
   UIX=""
@@ -76,13 +91,13 @@ for a,z in zip(pts,pts[1:]):
 c.append(f'input motionevent UP {pts[-1][0]} {pts[-1][1]}')
 print('; '.join(c))")"
   [ -n "$CMD" ] || { say "✗ 解除できない — 解除画面の格子が見つからない"; return 1; }
-  adb shell "$CMD" >/dev/null 2>&1; sleep 3
+  A shell "$CMD" >/dev/null 2>&1; sleep 3
   if locked; then say "✗ 解除 失敗（パターンが合わない可能性）"; return 1; fi
   say "★ロックを解除した"; return 0
 }
 export PF="$PATTERN_FILE"
 
-ui(){ adb exec-out uiautomator dump /dev/tty 2>/dev/null | python3 -c "
+ui(){ A exec-out uiautomator dump /dev/tty 2>/dev/null | python3 -c "
 import sys
 d=sys.stdin.buffer.read().decode('utf-8','replace'); i=d.rfind('</hierarchy>')
 sys.stdout.write(d[:i+12] if i>=0 else '')"; }
@@ -100,10 +115,16 @@ for n in re.finditer(r'<node[^>]*>',d):
 
 # ★試験用の入口: 解除だけを 1 回 試して終わる（--test-unlock）
 if [ "${1:-}" = "--test-unlock" ]; then
+  pick_serial                       # ★先に端末を選ぶ。選ぶ前に測ると
+  if [ -z "$SERIAL" ]; then         #   adb が「どっちの端末?」で失敗し、
+    say "✗ 掴める端末が無い"        #   ★見えないことを「ロックされていない」と読んでしまう
+    exit 1
+  fi
   if locked; then unlock; RC=$?; else say "既に解除されています"; RC=0; fi
   exit $RC
 fi
 
+pick_serial
 if [ "${AUTO_ACCEPT:-0}" = "1" ]; then
   say "見張り役 開始（★承認も押す ／ 許可: …${ALLOW_ID: -4} の 1 台のみ）"
 else
@@ -112,9 +133,11 @@ fi
 LAST=""
 WAS_LOCKED=0
 while true; do
+  alive || pick_serial
+  if [ -z "$SERIAL" ]; then sleep 3; continue; fi
   # ★ロック中でも、AnyDesk が前に出ていれば「着信が来ている」合図とみなして解除する
   if locked; then
-    R="$(adb shell dumpsys activity activities 2>/dev/null | tr -d '\r' | grep -m1 ResumedActivity)"
+    R="$(A shell dumpsys activity activities 2>/dev/null | tr -d '\r' | grep -m1 ResumedActivity)"
     case "$R" in
       # ★AnyDesk 本体だけでなく、Android 側の画面共有の確認・アプリ選択も引き金にする
       #   （無人アクセスだと承認ダイアログは出ず、いきなり systemui の
@@ -154,7 +177,7 @@ for n in re.finditer(r'<node[^>]*>',d):
         if b:
             x1,y1,x2,y2=map(int,b.groups()); print((x1+x2)//2,(y1+y2)//2); break")"
         if [ -n "$PB" ]; then
-          adb shell input -d 0 tap $PB; sleep 1; say "権限プロファイルを フルアクセス に"
+          A shell input -d 0 tap $PB; sleep 1; say "権限プロファイルを フルアクセス に"
           X="$(ui)"
         else
           PL="$(printf '%s' "$X" | python3 -c "
@@ -171,7 +194,7 @@ print(' | '.join(out) if out else '(プロファイルの項目が 1 つも無�
         fi
         B="$(printf '%s' "$X" | center 'resource-id="android:id/button1"')"
         [ -z "$B" ] && B="$(printf '%s' "$X" | center 'button1')"
-        if [ -n "$B" ]; then adb shell input -d 0 tap $B; say "★承諾（許可した相手）"; sleep 2; fi
+        if [ -n "$B" ]; then A shell input -d 0 tap $B; say "★承諾（許可した相手）"; sleep 2; fi
       else
         say "✗ 承認しません — 許可していない相手からの要求"
         sleep 5
@@ -187,7 +210,7 @@ print(' | '.join(out) if out else '(プロファイルの項目が 1 つも無�
     # ② 画面共有の確認 → 次へ
     if printf '%s' "$X" | grep -q 'screen_share_dialog_title'; then
       B="$(printf '%s' "$X" | center 'resource-id="android:id/button1"')"
-      if [ -n "$B" ]; then adb shell input -d 0 tap $B; say "画面共有 → 次へ"; sleep 2; fi
+      if [ -n "$B" ]; then A shell input -d 0 tap $B; say "画面共有 → 次へ"; sleep 2; fi
       continue
     fi
 
@@ -195,15 +218,15 @@ print(' | '.join(out) if out else '(プロファイルの項目が 1 つも無�
     if printf '%s' "$X" | grep -q '共有するアプリを選択'; then
       B="$(printf '%s' "$X" | center 'content-desc="LINE"')"
       if [ -n "$B" ]; then
-        adb shell input -d 0 tap $B; say "共有対象に LINE を選択"; sleep 3
-        adb shell am start -n jp.naver.line.android/.activity.SplashActivity >/dev/null 2>&1
+        A shell input -d 0 tap $B; say "共有対象に LINE を選択"; sleep 3
+        A shell am start -n jp.naver.line.android/.activity.SplashActivity >/dev/null 2>&1
         say "LINE を前へ"
       else
         # ★LINE が一覧に無い（force-stop 後など）⇒ 先に起動してからやり直す
         say "★LINE が一覧に無い ⇒ 先に起動してやり直す"
-        adb shell input -d 0 keyevent KEYCODE_BACK; sleep 2
-        adb shell am start -n jp.naver.line.android/.activity.SplashActivity >/dev/null 2>&1; sleep 5
-        adb shell am start -n com.anydesk.anydeskandroid/.gui.activity.HubActivity >/dev/null 2>&1; sleep 3
+        A shell input -d 0 keyevent KEYCODE_BACK; sleep 2
+        A shell am start -n jp.naver.line.android/.activity.SplashActivity >/dev/null 2>&1; sleep 5
+        A shell am start -n com.anydesk.anydeskandroid/.gui.activity.HubActivity >/dev/null 2>&1; sleep 3
         # 接続カードの操作アイコン列の 4 番目（画面キャプチャの再開）を、実測の枠から計算する
         Y="$(ui)"
         CB="$(printf '%s' "$Y" | python3 -c "
@@ -216,7 +239,7 @@ if m:
         x1,y1,x2,y2=map(int,b.groups())
         print(x1+439,(y1+y2)//2)")"
         if [ -n "$CB" ]; then
-          adb shell input -d 0 tap $CB; sleep 3
+          A shell input -d 0 tap $CB; sleep 3
           if printf '%s' "$(ui)" | grep -q 'screen_share_dialog_title'; then
             say "★やり直し成功（共有の確認が再び出た）"
           else
@@ -237,17 +260,17 @@ if m:
         say "★接続中を検出（投影あり）"; LAST="connected"
         ensure_a11y   # ★繋がった時に、操作権限が生きているか確かめる
       fi
-      R="$(adb shell dumpsys activity activities 2>/dev/null | tr -d '\r' | grep -m1 ResumedActivity)"
+      R="$(A shell dumpsys activity activities 2>/dev/null | tr -d '\r' | grep -m1 ResumedActivity)"
       case "$R" in
         *naver.line*|*anydesk*|*systemui*) ;;
-        *) adb shell am start -n jp.naver.line.android/.activity.SplashActivity >/dev/null 2>&1
+        *) A shell am start -n jp.naver.line.android/.activity.SplashActivity >/dev/null 2>&1
            say "LINE を前へ戻した" ;;
       esac
     else
       if [ "$LAST" = "connected" ]; then
         say "接続が切れた（待ち受けへ戻る）"; LAST=""
         # ★接続が終わったら 必ずロックする（誰が解除したかに関わらず）
-        adb shell input -d 0 keyevent KEYCODE_SLEEP >/dev/null 2>&1; sleep 3
+        A shell input -d 0 keyevent KEYCODE_SLEEP >/dev/null 2>&1; sleep 3
         if locked; then say "★ロックした（接続終了）"; else say "✗ ロックできなかった"; fi
         WAS_LOCKED=0
       fi

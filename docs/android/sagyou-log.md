@@ -101,3 +101,10 @@ screen_off_pocket   ★元 1 → 0
 直後 Bound services:{Service[label=AnyDesk Control Service AD1 … capabilities=33]}
 戻し方 adb shell settings put secure enabled_accessibility_services null
 ```
+
+## 無線デバッグ（2026-09-07 14:5x・剛さま裁定 C）
+  接続先: 端末の Wi-Fi アドレス:ポート（ポートは接続ごとに変わる）
+  ★ペアリングは不要だった — 既に main03 が「ペア設定済みのデバイス」に居た
+    （（adbkey の識別子は伏せました。~/.android-lab/ledger.md を参照） ＝ 2026-04-27 の鍵の識別子）
+  ★「このネットワークで常に許可する」を選んだ
+  ★adb tcpip 5555 は使っていない（Hestia の反対どおり）
