@@ -1,12 +1,12 @@
 # 台帳 — Android 端末
 
-**最終更新: 2026-09-06**
+**最終更新: 2026-09-07**
 
 ## 1. 何をしたいか / ★何をしないと決めたか
 
 - **A** 端末を Trinitas の常駐点にする（Termux + sshd + Tailscale）— ★未着手
 - **B** Mac から端末を掴んで開発に使う（adb / scrcpy）— ★道具は揃った
-- **C** ★iPhone から Android の LINE を遠隔操作する — ★2026-09-06 成立
+- **C** ★iPhone から Android の LINE を遠隔操作する — ★2026-09-07 完成（USB 不要・接続を押すだけ）
 
 ### やらないと決めたこと
 - **端末を root 化しない / bootloader を unlock しない**（2026-09-06 決定）
@@ -65,7 +65,7 @@ github-version/termux-boot.apk  743KB   GitHub 鍵 db86cf3c   ← 同上
 |---|---|---|---|---|
 | 開発者オプション | 有効 | 有効 | 2026-04-27 | — |
 | USB デバッグ | 有効 | 有効 | 2026-04-27 | — |
-| 無線デバッグ | `adb_wifi_enabled=0` | 0（未変更） | — | — |
+| 無線デバッグ | `adb_wifi_enabled=0` | ★1（ペアリング方式・常に許可） | 2026-09-07 | 設定 → 開発者オプション → ワイヤレス デバッグ を OFF |
 | 電池最適化の除外 | tailscale/termux ★無し | ★両方 追加 | 2026-09-06 | `dumpsys deviceidle whitelist -com.tailscale.ipn` |
 | 自動回転 | `accelerometer_rotation=1` | ★0（縦固定） | 2026-09-06 | `settings put system accelerometer_rotation 1` |
 | 画面の向き | `user_rotation=0` | 0 | — | — |
@@ -73,6 +73,10 @@ github-version/termux-boot.apk  743KB   GitHub 鍵 db86cf3c   ← 同上
 | AnyDesk 双方向接続 | 「接続を常に許可する」 | 同左（未変更） | 2026-09-05 頃 | — |
 | AnyDesk アクセシビリティ | 有効 | 有効（未変更） | 2026-09-06 00:14 | — |
 | AnyDesk 2 要素認証 | 無効 | ★無効（剛さま裁定で後回し） | — | ★2026-10-06 に再裁定 |
+| ★AnyDesk 無人アクセス | 無効 | ★有効＋パスワード（★剛さまが設定・私は知らない） | 2026-09-07 | プロファイル内で OFF |
+| ★以前のセッションのプロファイル | 有効 | ★無効＋クリア | 2026-09-07 | 設定 → 権限 で再び ON |
+| ★誤操作を防止 (screen_off_pocket) | 1 | ★0 | 2026-09-07 | `settings put system screen_off_pocket 1` |
+| ★AD1 アクセシビリティ | 有効 → ★途中で落ちていた | 有効（Bound services で確認） | 2026-09-07 | `settings put secure enabled_accessibility_services null` |
 | AnyDesk アクセス制限 | 無効 | 無効 | — | — |
 
 ## 5. ★なぜそう選んだか
