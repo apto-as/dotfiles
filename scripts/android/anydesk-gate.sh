@@ -86,7 +86,11 @@ if [ "${1:-}" = "--test-unlock" ]; then
   exit $RC
 fi
 
-say "見張り役 開始（許可: …${ALLOW_ID: -4} の 1 台のみ）"
+if [ "${AUTO_ACCEPT:-0}" = "1" ]; then
+  say "見張り役 開始（★承認も押す ／ 許可: …${ALLOW_ID: -4} の 1 台のみ）"
+else
+  say "見張り役 開始（★承認は押さない ／ 画面共有の確認・LINE の選択・ロック解除・終了後のロック のみ）"
+fi
 LAST=""
 WAS_LOCKED=0
 while true; do
@@ -103,8 +107,12 @@ while true; do
   X="$(ui)"
   if [ -n "$X" ]; then
 
-    # ① 着信リクエスト — ★許可した相手のときだけ承諾する
-    if printf '%s' "$X" | grep -q 'dialog_accept_title_text'; then
+    # ① 着信リクエスト
+    #  ★既定では押しません。AnyDesk の無人アクセス（パスワード方式）を設定した後は、
+    #    私が先に押すと ★パスワードを入れる前に対話セッションが始まってしまい、
+    #    「以前のセッション」＝見るだけのプロファイルで繋がってしまう（2026-09-07 実測）。
+    #  押させたい時だけ AUTO_ACCEPT=1 を付けて起動する。
+    if [ "${AUTO_ACCEPT:-0}" = "1" ] && printf '%s' "$X" | grep -q 'dialog_accept_title_text'; then
       MSG="$(printf '%s' "$X" | python3 -c "
 import re,sys
 d=sys.stdin.read()
@@ -148,6 +156,11 @@ print(' | '.join(out) if out else '(プロファイルの項目が 1 つも無�
         sleep 5
       fi
       continue
+    fi
+
+    if [ "${AUTO_ACCEPT:-0}" != "1" ] && printf '%s' "$X" | grep -q 'dialog_accept_title_text'; then
+      [ "$LAST" != "waiting" ] && say "承認ダイアログが出ています（★私は押しません。iPhone 側でパスワードを入れてください）" && LAST="waiting"
+      sleep 1.5; continue
     fi
 
     # ② 画面共有の確認 → 次へ
