@@ -89,3 +89,15 @@ screen_off_pocket   ★元 1 → 0
   戻し方: AnyDesk → 設定 → 権限 → 同項目を再び ON にする
   直後の実測: 無人アクセスを許可する=true / キーボードとマウスを使う=true /
               以前のセッションのプロファイル=false
+
+## 操作 9: 操作できない真因 — AD1 のアクセシビリティが落ちていた（2026-09-07 14:5x）
+```
+実測（設定値ではなく実体）
+  Bound services:{}   Enabled services:{}
+  enabled_accessibility_services = null / accessibility_enabled = 0
+★いつ・なぜ落ちたかは 未特定
+処置 settings put secure enabled_accessibility_services com.anydesk.adcontrol.ad1/...AccService
+     settings put secure accessibility_enabled 1
+直後 Bound services:{Service[label=AnyDesk Control Service AD1 … capabilities=33]}
+戻し方 adb shell settings put secure enabled_accessibility_services null
+```

@@ -14,6 +14,24 @@ say(){ echo "$(date '+%H:%M:%S') $*" | tee -a "$LOG"; }
 # ★ロック解除 — パターンは repo に書かない。~/.android-lab/pattern（chmod 600）から読む
 PATTERN_FILE="${ANDROID_PATTERN_FILE:-$HOME/.android-lab/pattern}"
 locked(){ adb shell dumpsys window 2>/dev/null | tr -d '\r' | grep -q 'mDreamingLockscreen=true'; }
+# ★AnyDesk の操作権限（AD1 のアクセシビリティ）が生きているか。落ちていたら戻す。
+#   これが無いと AnyDesk は「見るだけ」になる（公式: Android は既定で遠隔入力を許さない）。
+#   2026-09-07 に実際に落ちていて、剛さまが操作できなくなった。原因は未特定。
+A11Y_SVC="com.anydesk.adcontrol.ad1/com.anydesk.adcontrol.AccService"
+ensure_a11y(){
+  adb shell dumpsys accessibility 2>/dev/null | tr -d '\r' \
+    | grep -q "Bound services:{Service\[label=AnyDesk" && return 0
+  say "★AnyDesk の操作権限が落ちていた ⇒ 戻す"
+  adb shell settings put secure enabled_accessibility_services "$A11Y_SVC" >/dev/null 2>&1
+  adb shell settings put secure accessibility_enabled 1 >/dev/null 2>&1
+  sleep 2
+  if adb shell dumpsys accessibility 2>/dev/null | tr -d '\r' | grep -q "Bound services:{Service\[label=AnyDesk"; then
+    say "★操作権限を戻した（束縛を確認）"
+  else
+    say "✗ 操作権限を戻せなかった"
+  fi
+}
+
 # ★接続中か ＝ 画面を投影しているか（画面に何が出ているかに依存しない）
 projecting(){
   adb shell dumpsys media_projection 2>/dev/null | tr -d '\r' \
@@ -215,7 +233,10 @@ if m:
     #    （旧版の欠陥: 画面に AnyDesk のカードが見えるかで判定していたが、
     #      共有中は LINE を前に出すのでカードは見えず、★一度も検知できていなかった）
     if projecting; then
-      [ "$LAST" != "connected" ] && say "★接続中を検出（投影あり）" && LAST="connected"
+      if [ "$LAST" != "connected" ]; then
+        say "★接続中を検出（投影あり）"; LAST="connected"
+        ensure_a11y   # ★繋がった時に、操作権限が生きているか確かめる
+      fi
       R="$(adb shell dumpsys activity activities 2>/dev/null | tr -d '\r' | grep -m1 ResumedActivity)"
       case "$R" in
         *naver.line*|*anydesk*|*systemui*) ;;
