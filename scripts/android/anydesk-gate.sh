@@ -98,8 +98,11 @@ while true; do
   if locked; then
     R="$(adb shell dumpsys activity activities 2>/dev/null | tr -d '\r' | grep -m1 ResumedActivity)"
     case "$R" in
-      *anydesk*)
-        say "ロック中に AnyDesk が動いている ⇒ 解除を試みる"
+      # ★AnyDesk 本体だけでなく、Android 側の画面共有の確認・アプリ選択も引き金にする
+      #   （無人アクセスだと承認ダイアログは出ず、いきなり systemui の
+      #     MediaProjectionPermissionActivity がロック画面の裏に出る。2026-09-07 実測）
+      *anydesk*|*ediaprojection*|*ediaProjection*)
+        say "ロック中に AnyDesk / 画面共有の確認が動いている ⇒ 解除を試みる"
         if unlock; then WAS_LOCKED=1; fi ;;
     esac
     sleep 1.5; continue
