@@ -14,6 +14,12 @@ say(){ echo "$(date '+%H:%M:%S') $*" | tee -a "$LOG"; }
 # ★ロック解除 — パターンは repo に書かない。~/.android-lab/pattern（chmod 600）から読む
 PATTERN_FILE="${ANDROID_PATTERN_FILE:-$HOME/.android-lab/pattern}"
 locked(){ adb shell dumpsys window 2>/dev/null | tr -d '\r' | grep -q 'mDreamingLockscreen=true'; }
+# ★接続中か ＝ 画面を投影しているか（画面に何が出ているかに依存しない）
+projecting(){
+  adb shell dumpsys media_projection 2>/dev/null | tr -d '\r' \
+    | awk '/Media Projection:/{f=1;next} f{print;exit}' | grep -q 'null' && return 1
+  return 0
+}
 unlock(){
   [ -s "$PATTERN_FILE" ] || { say "✗ 解除できない — パターン未設定"; return 1; }
   adb shell input -d 0 keyevent KEYCODE_WAKEUP >/dev/null 2>&1; sleep 2
@@ -189,11 +195,11 @@ if m:
       continue
     fi
 
-    # ④ ★接続中のときだけ LINE を前へ戻す
-    #    （旧版の欠陥: AnyDesk は接続していなくても常時 foreground なので、
-    #      その条件だと接続していない間も LINE を引き戻し続けていた）
-    if printf '%s' "$X" | grep -q 'disconnect_incoming_card'; then
-      [ "$LAST" != "connected" ] && say "接続中を検出" && LAST="connected"
+    # ④ ★接続中か ＝ 投影しているか で判定する
+    #    （旧版の欠陥: 画面に AnyDesk のカードが見えるかで判定していたが、
+    #      共有中は LINE を前に出すのでカードは見えず、★一度も検知できていなかった）
+    if projecting; then
+      [ "$LAST" != "connected" ] && say "★接続中を検出（投影あり）" && LAST="connected"
       R="$(adb shell dumpsys activity activities 2>/dev/null | tr -d '\r' | grep -m1 ResumedActivity)"
       case "$R" in
         *naver.line*|*anydesk*|*systemui*) ;;
