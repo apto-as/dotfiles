@@ -35,3 +35,25 @@ brew の formula ディレクトリの時刻       いつ道具を入れたか
 fish history                             ★無ければ「Claude Code の Bash から動かしていた」の証拠
 ```
 ★ 2026-09-06 に、この 5 つで 4 ヶ月前を再構成できた。
+
+## ★ 見張り役の起こし方（セッションを跨いだら）
+
+`anydesk-gate.sh` は **起動したセッションに属します。**セッションが終われば止まります。
+
+```bash
+# 起こす
+nohup ~/dotfiles/scripts/android/anydesk-gate.sh >/dev/null 2>&1 &
+
+# 生きているか
+pgrep -f 'bash .*anydesk-gate.sh' && tail -3 ~/.android-lab/gate.log
+
+# 止める
+pkill -f 'bash .*anydesk-gate.sh'
+
+# 解除だけ試す
+~/dotfiles/scripts/android/anydesk-gate.sh --test-unlock
+```
+
+★ **止まると失われるもの**: ロックされている時の自動解除 ／ 画面共有の確認を通すこと ／
+共有するアプリに LINE を選ぶこと ／ 接続終了後の自動ロック。
+★ **止まっても残るもの**: 接続そのもの（無人アクセス）と、操作できること。
