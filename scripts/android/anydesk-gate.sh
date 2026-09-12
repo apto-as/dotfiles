@@ -26,6 +26,41 @@ pick_serial(){
 A(){ command adb ${SERIAL:+-s "$SERIAL"} "$@"; }
 alive(){ [ -n "$SERIAL" ] && command adb devices 2>/dev/null | tr -d '\r' | grep -q "^$SERIAL[[:space:]]*device$"; }
 
+# 無線の口は、無線デバッグを入れ直すたびに変わる。adb は古い口へ繋ぎ直そうとするだけで、
+# 新しい口は探さない（2026-09-10 11:18 に口が消え、9/12 まで誰も繋ぎ直さなかった）。
+# 掴める端末が無い間は、台帳のアドレスで adb の口を探して繋ぎに行く。
+# 端末を起こし続けないよう、探す間隔は 1 分から倍々に延ばし 8 分で止める。繋がったら 1 分に戻す。
+FIND_PORT="$(cd "$(dirname "$0")" && pwd)/find-adb-port.py"
+HUNT_NEXT=0
+HUNT_GAP=60
+HUNT_SAID=0
+hunt_wifi(){
+  local now target
+  now=$(date +%s)
+  [ "$now" -ge "$HUNT_NEXT" ] || return 1
+  [ -f "$FIND_PORT" ] || return 1
+  target="$(python3 "$FIND_PORT" 2>/dev/null)"
+  if [ -n "$target" ]; then
+    # 同じアドレスの古い口（offline）を先に外す。外さないと adb が古い口へ繋ぎ直し続ける
+    command adb devices 2>/dev/null | tr -d '\r' \
+      | awk -v h="${target%:*}:" 'index($1,h)==1 && $2!="device"{print $1}' \
+      | while read -r old; do command adb disconnect "$old" >/dev/null 2>&1; done
+    if command adb connect "$target" 2>/dev/null | grep -qE '^(connected|already connected)'; then
+      say "無線の口を見つけて繋ぎ直した"
+      HUNT_GAP=60; HUNT_NEXT=0; HUNT_SAID=0
+      pick_serial
+      return 0
+    fi
+    say "✗ 無線の口は見つかったが繋げなかった（端末側でこの Mac の許可が外れた可能性）"
+  elif [ "$HUNT_SAID" = "0" ]; then
+    say "無線の口が見つからない（端末の無線デバッグが OFF の可能性。ON にすれば自動で繋ぎ直す）"
+    HUNT_SAID=1
+  fi
+  HUNT_NEXT=$((now + HUNT_GAP))
+  [ "$HUNT_GAP" -lt 480 ] && HUNT_GAP=$((HUNT_GAP * 2))
+  return 1
+}
+
 # ★ロック解除 — パターンは repo に書かない。~/.android-lab/pattern（chmod 600）から読む
 PATTERN_FILE="${ANDROID_PATTERN_FILE:-$HOME/.android-lab/pattern}"
 locked(){ A shell dumpsys window 2>/dev/null | tr -d '\r' | grep -q 'mDreamingLockscreen=true'; }
@@ -116,6 +151,7 @@ for n in re.finditer(r'<node[^>]*>',d):
 # ★試験用の入口: 解除だけを 1 回 試して終わる（--test-unlock）
 if [ "${1:-}" = "--test-unlock" ]; then
   pick_serial                       # ★先に端末を選ぶ。選ぶ前に測ると
+  [ -z "$SERIAL" ] && hunt_wifi     #   （無線の口が変わっていたら探して繋ぐ）
   if [ -z "$SERIAL" ]; then         #   adb が「どっちの端末?」で失敗し、
     say "✗ 掴める端末が無い"        #   ★見えないことを「ロックされていない」と読んでしまう
     exit 1
@@ -134,19 +170,33 @@ LAST=""
 WAS_LOCKED=0
 while true; do
   alive || pick_serial
-  if [ -z "$SERIAL" ]; then sleep 3; continue; fi
-  # ★ロック中でも、AnyDesk が前に出ていれば「着信が来ている」合図とみなして解除する
+  if [ -z "$SERIAL" ]; then hunt_wifi || sleep 3; continue; fi
+  # ★ロック中に「着信が来ている」合図が出ていれば解除する
   if locked; then
     R="$(A shell dumpsys activity activities 2>/dev/null | tr -d '\r' | grep -m1 ResumedActivity)"
+    # 合図は Android 側の画面共有の確認（無人アクセスだと承認ダイアログは出ず、いきなり systemui の
+    # MediaProjectionPermissionActivity がロック画面の裏に出る。2026-09-07 実測）。
+    # AnyDesk 本体が前に居るだけでは合図にしない。2026-09-12 02:13 に、前に残っていた AnyDesk の
+    # 最初の画面（MainActivity）に反応して、着信が無いのにロックを外した。承認ダイアログを押す
+    # AUTO_ACCEPT=1 の時だけ、AnyDesk 本体も合図に含める（承認ダイアログは AnyDesk の画面に出るため）。
+    TRIGGER=""
     case "$R" in
-      # ★AnyDesk 本体だけでなく、Android 側の画面共有の確認・アプリ選択も引き金にする
-      #   （無人アクセスだと承認ダイアログは出ず、いきなり systemui の
-      #     MediaProjectionPermissionActivity がロック画面の裏に出る。2026-09-07 実測）
-      *anydesk*|*ediaprojection*|*ediaProjection*)
-        say "ロック中に AnyDesk / 画面共有の確認が動いている ⇒ 解除を試みる"
-        if unlock; then WAS_LOCKED=1; fi ;;
+      *ediaprojection*|*ediaProjection*) TRIGGER="画面共有の確認" ;;
+      *anydesk*) [ "${AUTO_ACCEPT:-0}" = "1" ] && TRIGGER="AnyDesk" ;;
     esac
+    if [ -n "$TRIGGER" ]; then
+      say "ロック中に ${TRIGGER} が動いている ⇒ 解除を試みる"
+      if unlock; then WAS_LOCKED=1; UNLOCKED_AT=$(date +%s); fi
+    fi
     sleep 1.5; continue
+  fi
+  # 見張り役が外したロックは、画面共有が始まらないまま 90 秒 経ったらかけ直す。
+  # 2026-09-12 02:13 に、やり直しが失敗した後、ロックが外れたまま端末が置かれていた。
+  if [ "$WAS_LOCKED" = "1" ] && [ "$LAST" != "connected" ] && [ $(( $(date +%s) - ${UNLOCKED_AT:-0} )) -ge 90 ] && ! projecting; then
+    A shell input -d 0 keyevent KEYCODE_HOME >/dev/null 2>&1; sleep 1
+    A shell input -d 0 keyevent KEYCODE_SLEEP >/dev/null 2>&1; sleep 3
+    if locked; then say "✗ 解除したが 90 秒 画面共有が始まらなかった ⇒ ロックし直した"; else say "✗ 解除したまま接続が成り立たず、ロックもできなかった"; fi
+    WAS_LOCKED=0
   fi
   X="$(ui)"
   if [ -n "$X" ]; then
@@ -264,7 +314,14 @@ if m:
       case "$R" in
         *naver.line*|*anydesk*|*systemui*) ;;
         *) A shell am start -n jp.naver.line.android/.activity.SplashActivity >/dev/null 2>&1
-           say "LINE を前へ戻した" ;;
+           # 何が LINE を押しのけたかを残す（同じ相手は 1 回だけ）。2026-09-12 02:40 に
+           # 4 秒おきに 12 回 引き戻したが、何が前に出ていたかが記録に無く、原因を言えなかった。
+           WHO="$(printf '%s' "$R" | grep -o '[A-Za-z0-9_.]*/[A-Za-z0-9_.$]*' | head -1)"
+           if [ "$WHO" != "${LAST_DISPLACER:-}" ]; then
+             say "LINE を前へ戻した（前に出ていた画面: ${WHO:-不明}）"; LAST_DISPLACER="$WHO"
+           else
+             say "LINE を前へ戻した（同上）"
+           fi ;;
       esac
     else
       if [ "$LAST" = "connected" ]; then

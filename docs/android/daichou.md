@@ -66,6 +66,7 @@ github-version/termux-boot.apk  743KB   GitHub 鍵 db86cf3c   ← 同上
 | 開発者オプション | 有効 | 有効 | 2026-04-27 | — |
 | USB デバッグ | 有効 | 有効 | 2026-04-27 | — |
 | 無線デバッグ | `adb_wifi_enabled=0` | ★1（ペアリング方式・常に許可） | 2026-09-07 | 設定 → 開発者オプション → ワイヤレス デバッグ を OFF |
+| 無線デバッグ（再起動後） | 再起動で 0 に戻る（2026-09-10 11:18 に実測） | 1（2026-09-12 01:5x に剛さまが ON） | 2026-09-12 | 同上。口の番号は ON のたびに変わる（見張り役が探す） |
 | 電池最適化の除外 | tailscale/termux ★無し | ★両方 追加 | 2026-09-06 | `dumpsys deviceidle whitelist -com.tailscale.ipn` |
 | 自動回転 | `accelerometer_rotation=1` | ★0（縦固定） | 2026-09-06 | `settings put system accelerometer_rotation 1` |
 | 画面の向き | `user_rotation=0` | 0 | — | — |
