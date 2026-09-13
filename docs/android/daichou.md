@@ -1,6 +1,6 @@
 # 台帳 — Android 端末
 
-**最終更新: 2026-09-07**
+**最終更新: 2026-09-13**
 
 ## 1. 何をしたいか / ★何をしないと決めたか
 
@@ -66,7 +66,7 @@ github-version/termux-boot.apk  743KB   GitHub 鍵 db86cf3c   ← 同上
 | 開発者オプション | 有効 | 有効 | 2026-04-27 | — |
 | USB デバッグ | 有効 | 有効 | 2026-04-27 | — |
 | 無線デバッグ | `adb_wifi_enabled=0` | ★1（ペアリング方式・常に許可） | 2026-09-07 | 設定 → 開発者オプション → ワイヤレス デバッグ を OFF |
-| 無線デバッグ（再起動後） | 再起動で 0 に戻る（2026-09-10 11:18 に実測） | 1（2026-09-12 01:5x に剛さまが ON） | 2026-09-12 | 同上。口の番号は ON のたびに変わる（見張り役が探す） |
+| 無線デバッグ（切れた後） | Wi-Fi が切れる・親機が変わると 0 に戻る（2026-09-13 に原因を訂正。前の版は「再起動で」） | 1（2026-09-13 23:39 に剛さまが ON） | 2026-09-13 | 同上。口の番号は ON のたびに変わる（見張り役が探す） |
 | 電池最適化の除外 | tailscale/termux ★無し | ★両方 追加 | 2026-09-06 | `dumpsys deviceidle whitelist -com.tailscale.ipn` |
 | 自動回転 | `accelerometer_rotation=1` | ★0（縦固定） | 2026-09-06 | `settings put system accelerometer_rotation 1` |
 | 画面の向き | `user_rotation=0` | 0 | — | — |
@@ -79,6 +79,8 @@ github-version/termux-boot.apk  743KB   GitHub 鍵 db86cf3c   ← 同上
 | ★誤操作を防止 (screen_off_pocket) | 1 | ★0 | 2026-09-07 | `settings put system screen_off_pocket 1` |
 | ★AD1 アクセシビリティ | 有効 → ★途中で落ちていた | 有効（Bound services で確認） | 2026-09-07 | `settings put secure enabled_accessibility_services null` |
 | AnyDesk アクセス制限 | 無効 | 無効 | — | — |
+| より最適な Wi-Fi ネットワークに切り替え（`sem_wifi_switch_to_better_wifi_enabled`） | 1 | 0 | 2026-09-13 | 設定 → 接続 → Wi-Fi → ⋮ → Intelligent Wi-Fi で ON |
+| 家で届く他の 2 つの網の自動再接続（`allowAutojoin`） | 両方 true | 両方 false | 2026-09-13 | Wi-Fi → ⋮ → 詳細設定 → ネットワークを管理 → 網を選ぶ → 自動再接続 を ON（網の名前はカード bee4398d） |
 
 ## 5. ★なぜそう選んだか
 
@@ -90,6 +92,7 @@ github-version/termux-boot.apk  743KB   GitHub 鍵 db86cf3c   ← 同上
 | 2026-09-06 | 共有は「LINE だけ」 | 画面全体を共有 | 画面全体だと SMS のワンタイムコード・Wallet・Termius が映る（Hestia 監査） |
 | 2026-09-06 | 2 要素認証は後回し | 先に有効化 | ★Hestia は反対。★剛さま裁定で越えた。★期限 2026-10-06 に再裁定 |
 | 2026-09-06 | 縦画面に固定 | 自動回転のまま | iPhone の縦横比とほぼ一致（2.33:1 対 2.17:1）。横だと黒帯だらけ |
+| 2026-09-13 | 端末の網を家の 1 つに寄せる | 親機のチャンネル固定も足す ／ adb tcpip ／ 今のまま | 無線デバッグが切れる原因は Wi-Fi の繋ぎ直し。端末が自分で移る分は端末の設定で止まる。tcpip は 9/07 の裁定 C を覆し、解錠の図形が暗号化されずに Wi-Fi を流れる（剛さま裁定・質疑応答） |
 
 ## 6. 最後の既知良好状態
 
