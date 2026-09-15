@@ -33,7 +33,39 @@ alive(){ [ -n "$SERIAL" ] && command adb devices 2>/dev/null | tr -d '\r' | grep
 FIND_PORT="$(cd "$(dirname "$0")" && pwd)/find-adb-port.py"
 HUNT_NEXT=0
 HUNT_GAP=60
-HUNT_SAID=0
+# 口が見つからない時は、端末が家の網に居るかも見て、状態が変わった時だけ 1 行残す。
+# 2026-09-14 12:37 に切れた時、「持ち出し中」か「家に居て無線デバッグが OFF」かを記録から言えなかった。
+# 判定は ping だけ（3 回のうち 1 回でも応答すれば「居る」）。寝ている端末は応答しないことがあるので、
+# 「見えない」は「ping に応答しない」の意味で読む。アドレスは台帳から読み、記録には書かない。
+NET_STATE=""
+lan_addr(){
+  if [ -n "${ANDROID_LAN_ADDR:-}" ]; then printf '%s' "$ANDROID_LAN_ADDR"; return; fi
+  grep -E "端末の Wi-Fi アドレス" ~/.android-lab/ledger.md 2>/dev/null | grep -oE "([0-9]{1,3}\.){3}[0-9]{1,3}" | head -1
+}
+phone_on_lan(){   # 0 = 居る ／ 1 = 見えない ／ 2 = 台帳にアドレスが無い
+  local ip; ip="$(lan_addr)"
+  [ -n "$ip" ] || return 2
+  ping -c 3 -W 1000 -t 5 "$ip" >/dev/null 2>&1 && return 0
+  return 1
+}
+note_lan(){
+  local st rc
+  phone_on_lan; rc=$?
+  case "$rc" in 0) st="home" ;; 2) st="noaddr" ;; *) st="away" ;; esac
+  [ "$st" = "$NET_STATE" ] && return
+  NET_STATE="$st"
+  case "$st" in
+    home)   say "端末は家の網に居るが、無線の口が無い（無線デバッグが OFF。端末で ON にすれば自動で繋ぎ直す）" ;;
+    away)   say "端末が家の網に見えない（ping に応答なし。持ち出し中か、Wi-Fi が切れている）" ;;
+    noaddr) say "✗ 台帳に端末のアドレスが無いので、網に居るかを判定できない" ;;
+  esac
+}
+# 試験用の入口: 網に居るかを 1 回だけ判定して終わる（--test-lan）。ANDROID_LAN_ADDR で相手を差し替えられる
+if [ "${1:-}" = "--test-lan" ]; then
+  phone_on_lan; rc=$?
+  case "$rc" in 0) echo "居る" ;; 2) echo "アドレス無し" ;; *) echo "見えない" ;; esac
+  exit 0
+fi
 hunt_wifi(){
   local now target
   now=$(date +%s)
@@ -47,14 +79,13 @@ hunt_wifi(){
       | while read -r old; do command adb disconnect "$old" >/dev/null 2>&1; done
     if command adb connect "$target" 2>/dev/null | grep -qE '^(connected|already connected)'; then
       say "無線の口を見つけて繋ぎ直した"
-      HUNT_GAP=60; HUNT_NEXT=0; HUNT_SAID=0
+      HUNT_GAP=60; HUNT_NEXT=0; NET_STATE=""
       pick_serial
       return 0
     fi
     say "✗ 無線の口は見つかったが繋げなかった（端末側でこの Mac の許可が外れた可能性）"
-  elif [ "$HUNT_SAID" = "0" ]; then
-    say "無線の口が見つからない（端末の無線デバッグが OFF の可能性。ON にすれば自動で繋ぎ直す）"
-    HUNT_SAID=1
+  else
+    note_lan
   fi
   HUNT_NEXT=$((now + HUNT_GAP))
   [ "$HUNT_GAP" -lt 480 ] && HUNT_GAP=$((HUNT_GAP * 2))
