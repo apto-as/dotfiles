@@ -9,7 +9,45 @@ if [ -z "$ALLOW_ID" ]; then
 fi
 LOG="${ANYDESK_GATE_LOG:-$HOME/.android-lab/gate.log}"
 mkdir -p "$(dirname "$LOG")"
-say(){ echo "$(date '+%H:%M:%S') $*" | tee -a "$LOG"; }
+say(){ echo "$(date '+%Y-%m-%d %H:%M:%S') $*" | tee -a "$LOG"; }
+
+# ★二重起動を止める。2026-09-17 設置、2026-09-18 に作り直し。
+# 二重になると hunt_wifi が独立に 2 本 回って探す間隔が実質 半分になり、
+# adb connect と disconnect が互いを打ち消す。
+#
+# 最初は pgrep で同じ名前のプロセスを数えたが、二度 誤作動した（どちらも実測）。
+#   1 緩い型 'bash .*anydesk-gate.sh' は、起こす側の shell にも当たった。
+#     nohup bash .../anydesk-gate.sh & と打った親の command line に同じ名前が入るため。
+#   2 型を締めても、pgrep をコマンド置換の中で走らせていたので、置換のために fork された
+#     自分自身の子（同じ command line・違う pid）を「別の 1 本」と数えた。$$ では除けない。
+# どちらも「自分を他人と見間違える」形だった。数える相手が自分だと分からない道具は使わない。
+# 錠 file だけで判定する。作るのは atomic（noclobber）で、生死は kill -0 で見る。
+GATE_LOCK="${ANYDESK_GATE_LOCK:-$HOME/.android-lab/gate.lock}"
+if ! (set -o noclobber; echo $$ > "${GATE_LOCK}") 2>/dev/null; then
+  _gate_old="$(cat "${GATE_LOCK}" 2>/dev/null)"
+  # ★生きているかだけでなく、それが見張り役かを見る。2026-09-18 に気づいた穴。
+  #   強制終了や異常終了で trap が走らないと、目印が古い pid のまま残る。OS は pid を
+  #   使い回すので、無関係なプロセスがその番号を持つと kill -0 が通り、見張り役は
+  #   永久に起動を拒み続ける。黙って。生死の軸と、本人かの軸は別。
+  #   ここは 1 つの pid を確かめるだけなので、名前で数える時のような取り違えは起きない。
+  if [ -n "${_gate_old}" ] && kill -0 "${_gate_old}" 2>/dev/null \
+     && ps -o command= -p "${_gate_old}" 2>/dev/null | grep -q 'anydesk-gate\.sh'; then
+    say "二重起動を止めました。目印を持っているのは pid ${_gate_old} です"
+    exit 1
+  fi
+  say "前回の錠が残っていました（pid ${_gate_old:-不明} は既に居ません）。錠を取り直します"
+  rm -f "${GATE_LOCK}"
+  echo $$ > "${GATE_LOCK}"
+fi
+# ★合図で止められた時は、後始末をしてから必ず終わる。2026-09-18 に踏んだ穴。
+#   前は EXIT INT TERM をまとめて 1 つの trap にしていたので、TERM を受けると
+#   目印を消すだけで走り続けた。止めたつもりの側が生き残り、目印が空いた隙に
+#   もう 1 本 起動して、二重を防ぐはずの仕掛けが 二重を作る側に回った。
+#   後始末は EXIT だけに置き、合図は exit を呼んで EXIT を通す。
+trap 'rm -f "${GATE_LOCK}"' EXIT
+trap 'exit 143' TERM
+trap 'exit 130' INT
+
 
 # ★どの端末を掴むか。★無線を優先する（USB を抜いても続くように）
 SERIAL=""
@@ -19,6 +57,22 @@ pick_serial(){
   u="$(command adb devices 2>/dev/null | tr -d '\r' | awk '/[[:space:]]device$/{print $1}' | grep -v ':' | head -1)"
   local new="${w:-$u}"
   if [ "$new" != "$SERIAL" ]; then
+    # ★採る相手が変わった時だけ同定を照合する。2026-09-18 に気づいた穴。
+    #   同定の照合を hunt_wifi にだけ置いていたので、adb に既に繋がっている相手を
+    #   ここで拾う道は素通りだった。手で adb connect した相手も、他人が繋いだ相手も同じ。
+    #   新しく足した道だけ守って、元から在った道を守っていなかった。
+    if [ -n "$new" ]; then
+      _pk_pin="$(cat "$HOME/.android-lab/device-serial" 2>/dev/null | tr -d '\r\n')"
+      if [ -n "${_pk_pin}" ]; then
+        _pk_got="$(command adb -s "$new" shell getprop ro.serialno 2>/dev/null | tr -d '\r\n')"
+        if [ "${_pk_got}" != "${_pk_pin}" ]; then
+          say "✗ 掴もうとした端末が控えと違うので採りません（模様は打ち込んでいない）"
+          command adb disconnect "$new" >/dev/null 2>&1
+          SERIAL=""
+          return 0
+        fi
+      fi
+    fi
     SERIAL="$new"
     [ -n "$SERIAL" ] && say "掴む端末: $(printf '%s' "$SERIAL" | sed 's/:[0-9]*$/:<ポート>/')" || say "✗ 掴める端末が無い"
   fi
@@ -78,6 +132,21 @@ hunt_wifi(){
       | awk -v h="${target%:*}:" 'index($1,h)==1 && $2!="device"{print $1}' \
       | while read -r old; do command adb disconnect "$old" >/dev/null 2>&1; done
     if command adb connect "$target" 2>/dev/null | grep -qE '^(connected|already connected)'; then
+      # ★繋いだ相手が本当にあの端末かを確かめる。2026-09-17 に mDNS で探す道を足したので、
+      #   同じ網の誰かが偽の名乗りを出すと、ここへ偽物のアドレスが来る余地ができた。
+      #   見張り役は繋いだ相手にロック解除の模様を打ち込むので、偽物に繋ぐと模様が渡る。
+      #   探す道具の側でも名乗りの識別子を照合しているが、こちらは繋いだ後の最終確認。
+      GATE_PIN="$(cat "$HOME/.android-lab/device-serial" 2>/dev/null | tr -d '\r\n')"
+      if [ -n "${GATE_PIN}" ]; then
+        GATE_GOT="$(command adb -s "$target" shell getprop ro.serialno 2>/dev/null | tr -d '\r\n')"
+        if [ "${GATE_GOT}" != "${GATE_PIN}" ]; then
+          command adb disconnect "$target" >/dev/null 2>&1
+          say "✗ 繋いだ相手が控えの端末と違ったので切り離した（模様は打ち込んでいない）"
+          HUNT_NEXT=$((now + HUNT_GAP))
+          [ "$HUNT_GAP" -lt 480 ] && HUNT_GAP=$((HUNT_GAP * 2))
+          return 1
+        fi
+      fi
       say "無線の口を見つけて繋ぎ直した"
       HUNT_GAP=60; HUNT_NEXT=0; NET_STATE=""
       pick_serial
