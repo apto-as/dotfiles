@@ -100,7 +100,7 @@ GEMINI_API_KEY=your-gemini-api-key-here
 OPENAI_API_KEY=your-openai-api-key-here
 
 # Google Application Credentials Path
-GOOGLE_APPLICATION_CREDENTIALS=~/.gemini/credentials.json
+GOOGLE_APPLICATION_CREDENTIALS=$HOME/.gemini/credentials.json
 
 # AWS Profile
 AWS_PROFILE=your-aws-profile-name

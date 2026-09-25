@@ -65,13 +65,108 @@ alias ls "eza -ahl"
 alias la "eza -ahl --git --icons"
 alias vim nvim
 
-# ⚠️ SECURITY WARNING: This alias bypasses Claude Code's permission system
+# ---------------------------------------------------------------------------
+# Claude Code launchers — セッション名を cwd から自動で付ける (2026-08-12)
+#
+#   cc / cc-unsafe                  … cwd に対応した既定名で起動
+#   cc-unsafe -n <name>             … 名前を明示（既定より優先）
+#   cc-unsafe --name <name>         … 同上（--name=<name> も可）
+#   cc-unsafe --glm / --fleet / --claude … モデルを選ぶ（--fleet と --local は同じ）
+#   引数でモデルを選ばなければ、持ち場の表 ~/.tmws/lanes/lanes.tsv のモデルに従う。表に無ければ Claude（2026-09-25）
+#   その他の引数は全て起動口（claude / claude-glm / claude-local）へ透過（-c / --resume / -p / --model …）
+#
+# 名前は claude 本体の --name が付ける（/rename と同じ custom-title を書く）。
+# ★実測 2026-08-12: CLAUDE_CODE_SESSION_NAME 環境変数では名前は付かない。
+# 表に無い場所はディレクトリ名がそのまま名前になる（無名より探せるので）。
+# ---------------------------------------------------------------------------
+
+function __cc_lane_from_table --description '持ち場の表（~/.tmws/lanes/lanes.tsv）で、cwd に当たる持ち場の名前を返す'
+    set -l t $HOME/.tmws/lanes/lanes.tsv
+    test -r $t; or return 1
+    # 作業場所が cwd と同じか、その下なら当たり。いちばん長い作業場所を選ぶ
+    awk -F'\t' -v d=(pwd -P) '$0 !~ /^#/ && NF>=5 { if (d==$5 || index(d, $5"/")==1) { if (length($5)>best) { best=length($5); n=$1 } } } END { if (n!="") print n; else exit 1 }' $t
+end
+
+function __cc_lane_model --description '持ち場の表から、名前の既定のモデル（claude / glm / local）を返す'
+    set -l t $HOME/.tmws/lanes/lanes.tsv
+    test -r $t; or return 1
+    awk -F'\t' -v n=$argv[1] '$0 !~ /^#/ && $1==n { print $3; f=1; exit } END { if (!f) exit 1 }' $t
+end
+
+function __cc_session_name --description 'cwd から既定のセッション名を決める'
+    # 2026-09-25: 持ち場の表を読むだけ。表に無い場所はディレクトリ名がそのまま
+    #（この repo は公開なので、持ち場の名前と作業場所の path を書く地図は置かない）
+    if set -l n (__cc_lane_from_table)
+        echo $n
+        return
+    end
+    basename (pwd -P)
+end
+
+function __cc_launch --description 'claude をセッション名つきで起動する（--glm / --fleet でモデルを選ぶ）'
+    # モデルの選び方（2026-09-25 剛さまの依頼。非常駐の持ち場を起こす時に選び易くする）
+    #   既定      Claude（Anthropic・claude.ai のログイン。Remote Control は settings の remoteControlAtStartup で自動）
+    #   --glm     Z.ai の GLM-5.3（~/.tmws/scripts/claude-glm。同時 1〜2 つまでの規約。/rc と claude.ai の連携は使えない）
+    #   --fleet   艦隊のローカル LLM（~/.tmws/scripts/claude-local。口は ~/.tmws/lanes/next/local-endpoint.env。/rc は使えない）
+    #   --local は --fleet と同じ
+    #   --claude  表に関わらず Claude
+    #   引数で選ばなければ、持ち場の表（~/.tmws/lanes/lanes.tsv）のモデルに従う。表に無ければ Claude（2026-09-25 剛さま裁定「表に従う」）
+    set -l model
+    set -l rest
+    for a in $argv
+        switch $a
+            case --glm
+                set model glm
+            case --fleet --local
+                set model local
+            case --claude
+                set model claude
+            case '*'
+                set -a rest $a
+        end
+    end
+    # 名前: 呼び出し側が明示していればそれ、無ければ表か地図から
+    set -l name
+    set -l i (contains -i -- -n $rest; or contains -i -- --name $rest)
+    if test -n "$i"
+        set name $rest[(math $i + 1)]
+    else if set -l eq (string match -r -- '^--name=(.*)$' $rest)
+        set name $eq[2]
+    end
+    set -l named yes
+    if test -z "$name"
+        set named no
+        set name (__cc_session_name)
+    end
+    if test -z "$model"
+        set model (__cc_lane_model $name; or echo claude)
+    end
+    set -l launcher (command -s claude)
+    switch $model
+        case glm
+            set launcher $HOME/.tmws/scripts/claude-glm
+        case local
+            set launcher $HOME/.tmws/scripts/claude-local
+    end
+    echo "（$name を $model で起こします）" >&2
+    if test $named = yes
+        $launcher $rest
+    else
+        $launcher --name $name $rest
+    end
+end
+
+# ⚠️ SECURITY WARNING: This bypasses Claude Code's permission system
 # Only use for trusted operations in controlled environments
 # Renamed from 'cc' to 'cc-unsafe' per Hestia security audit (2025-12-18)
-alias cc-unsafe "claude --dangerously-skip-permissions"
+function cc-unsafe --wraps=claude --description 'Claude Code (skip permissions, auto session name)'
+    __cc_launch --dangerously-skip-permissions $argv
+end
 
-# Safe Claude Code alias (recommended for normal use)
-alias cc "claude"
+# Safe Claude Code launcher (recommended for normal use)
+function cc --wraps=claude --description 'Claude Code (auto session name)'
+    __cc_launch $argv
+end
 
 # tmux layout aliases
 alias tcc "$HOME/.config/tmux/layouts/claude-code.sh"  # Claude Code development layout
